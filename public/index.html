@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#100d18">
+<title>Vampir Köylü Online</title>
+
+<style>
+:root {
+  --bg: #100d18;
+  --panel: #1a1525;
+  --red: #e5485d;
+  --gold: #f0c674;
+  --text: #f7f1ff;
+  --muted: #b9afc9;
+  --line: #41324e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at top, #30203e, #100d18 60%);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: auto;
+  padding: 18px 14px 40px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  font-size: 27px;
+  background: #49223d;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.brand h1 {
+  font-size: clamp(20px, 5vw, 29px);
+  margin: 0;
+}
+
+.brand p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 2px 0;
+}
+
+.pill, .phase {
+  font-size: 11px;
+  border: 1px solid #66503a;
+  border-radius: 99px;
+  padding: 7px 10px;
+  color: var(--gold);
+}
+
+.hero, .card {
+  border: 1px solid #42304b;
+  border-radius: 20px;
+  background: #191421ed;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.hero {
+  background: linear-gradient(120deg, #2b1a35, #17121f);
+  padding: 26px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.hero h2 {
+  font-size: clamp(29px, 7vw, 42px);
+  line-height: 1.05;
+  margin: 8px 0;
+}
+
+.hero p, .hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.field label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.field input {
+  padding: 13px;
+  background: #100d18;
+  border: 1px solid #493a56;
+  color: white;
+  border-radius: 12px;
+  font: inherit;
+  width: 100%;
+}
+
+button {
+  font: inherit;
+  font-weight: 800;
+  padding: 12px 15px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.primary {
+  background: linear-gradient(135deg, #ef5267, #a72d55);
+  color: white;
+}
+
+.secondary {
+  background: #30243d;
+  border: 1px solid #51405e;
+  color: white;
+}
+
+.gold {
+  background: var(--gold);
+  color: #261a20;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.buttons button {
+  flex: 1;
+}
+
+.notice {
+  background: #2c2138;
+  border: 1px solid #4b3958;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  color: #ddd0e7;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.players {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 9px;
+  margin: 14px 0;
+}
+
+.player {
+  background: #211a2d;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.player.me {
+  border-color: var(--gold);
+}
+
+.player.dead {
+  opacity: 0.38;
+  filter: grayscale(1);
+}
+
+.player.selected {
+  border-color: var(--red);
+  background: #482136;
+}
+
+.avatar {
+  font-size: 26px;
+}
+
+.name {
+  font-weight: 800;
+  font-size: 13px;
+  margin: 5px 0;
+}
+
+.tag {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.rolebox {
+  background: linear-gradient(130deg, #37203c, #201729);
+  border: 1px solid #68405d;
+  border-radius: 15px;
+  padding: 16px;
+  margin: 13px 0;
+}
+
+.role {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.log {
+  max-height: 200px;
+  overflow: auto;
+  background: #100d18;
+  border: 1px solid #382b43;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  color: #c9bdd8;
+  line-height: 1.6;
+}
+
+.log div + div {
+  border-top: 1px solid #2b2234;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.footer {
+  text-align: center;
+  color: #766a82;
+  font-size: 11px;
+  margin: 18px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  background: #f0c674;
+  color: #261a20;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  z-index: 9;
+  max-width: 90vw;
+  text-align: center;
+}
+
+@media (max-width: 650px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 22px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">🦇</div>
+    <div>
+      <h1>Vampir Köylü Online</h1>
+      <p>Gece çöker. Kimseye güvenme.</p>
+    </div>
+  </div>
+  <div class="pill" id="connection">● Bağlanıyor…</div>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">GERÇEK ZAMANLI ÇOK OYUNCULU</div>
+  <h2>Gündüz masum,<br>gece avcı.</h2>
+  <p>
+    Oda kur, arkadaşlarına kodu gönder ve aynı oyunda buluş.
+    Roller sunucuda belirlenir ve gizli tutulur. 🌙
+  </p>
+</section>
+
+<section id="home" class="grid">
+
+  <div class="card">
+    <h3>🎮 Köye katıl</h3>
+
+    <div class="field">
+      <label>OYUNCU ADIN</label>
+      <input id="name" maxlength="18" placeholder="Örn. GeceKuşu">
+    </div>
+
+    <button class="primary" id="create" style="width:100%">
+      ＋ Yeni oda oluştur
+    </button>
+
+    <div class="field">
+      <label>ODA KODU</label>
+      <input id="code" maxlength="6" placeholder="Örn. A3F9">
+    </div>
+
+    <button class="secondary" id="join" style="width:100%">
+      ↗ Odaya katıl
+    </button>
+
+    <div class="notice">
+      En az 5, en fazla 12 oyuncu.
+      Odayı kuran kişi oyun başlatıcısı olur.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📜 Roller</h3>
+    <p class="hint">🧛 <b>Vampir:</b> Gece bir hedefe oy verin.</p>
+    <p class="hint">🔮 <b>Kâhin:</b> Her gece bir oyuncuyu araştırır.</p>
+    <p class="hint">🧑‍🌾 <b>Köylü:</b> Gündüz şüpheliyi oylamayla gönderir.</p>
+    <p class="hint">
+      🏆 Köylüler tüm vampirleri elerse köylüler kazanır.
+      Vampirler yaşayan diğer oyuncularla eşitlenirse vampirler kazanır.
+    </p>
+  </div>
+
+</section>
+
+<section id="game" class="hidden">
+
+  <div class="card">
+    <div class="status">
+      <div>
+        <div class="eyebrow" id="roomLabel">ODA — ----</div>
+        <h2 id="phaseTitle">Lobi</h2>
+      </div>
+      <div class="phase" id="phasePill">LOBI</div>
+    </div>
+
+    <div class="notice" id="phaseText"></div>
+
+    <div id="roleArea" class="rolebox hidden">
+      <div class="eyebrow">GİZLİ ROLÜN</div>
+      <div class="role" id="roleName"></div>
+      <p class="hint" id="roleDesc"></p>
+      <p class="hint" id="privateMessage"></p>
+    </div>
+
+    <h3>👥 Oyuncular <span class="hint" id="count"></span></h3>
+    <div class="players" id="players"></div>
+    <div class="buttons" id="actions"></div>
+    <p class="hint" id="selectionHint"></p>
+  </div>
+
+  <div class="card">
+    <h3>📣 Köy meydanı</h3>
+    <div class="log" id="log">
+      <div>Köy meydanı sessiz...</div>
+    </div>
+  </div>
+
+</section>
+
+<div class="footer">
+  VAMPİR KÖYLÜ ONLINE • Sunucu bağlantılı oyun
+</div>
+
+</main>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+const socket = io();
+
+const $ = id => document.getElementById(id);
+
+let state = null;
+let selected = null;
+let events = [];
+let lastPhase = null;
+
+const avatars = [
+  '🧑‍🌾','🧙','🧑‍🚀','🧑‍🎤','🧑‍🍳','🕵️',
+  '🧑‍🎨','🧑‍🔧','🥷','🧝','🧑‍💼','🧑‍🚒'
+];
+
+socket.on('connect', () => {
+  $('connection').textContent = '● Bağlı';
+});
+
+socket.on('disconnect', () => {
+  $('connection').textContent = '● Bağlantı kesildi';
+});
+
+function toast(message) {
+  $('toast').textContent = message;
+  $('toast').classList.remove('hidden');
+
+  setTimeout(() => {
+    $('toast').classList.add('hidden');
+  }, 2600);
+}
+
+socket.on('toast', toast);
+
+socket.on('state', s => {
+  state = s;
+
+  if (lastPhase !== s.phase) {
+    selected = null;
+    lastPhase = s.phase;
+  }
+
+  render();
+});
+
+socket.on('events', e => {
+  events = e;
+  renderLog();
+});
+
+function playerName() {
+  return $('name').value.trim() || 'GeceKuşu';
+}
+
+$('create').onclick = () => {
+  socket.emit('createRoom', { name: playerName() }, result => {
+    if (!result.ok) {
+      toast(result.error);
+    } else {
+      toast('Oda oluşturuldu: ' + result.code);
+    }
+  });
+};
+
+$('join').onclick = () => {
+  socket.emit('joinRoom', {
+    name: playerName(),
+    code: $('code').value.trim().toUpperCase()
+  }, result => {
+    if (!result.ok) {
+      toast(result.error);
+    } else {
+      toast('Odaya katıldın!');
+    }
+  });
+};
+
+function addButton(label, cls, callback, disabled = false) {
+  const button = document.createElement('button');
+
+  button.className = cls;
+  button.textContent = label;
+  button.disabled = disabled;
+  button.onclick = callback;
+
+  $('actions').append(button);
+}
+
+function render() {
+  if (!state) return;
+
+  $('home').classList.add('hidden');
+  $('game').classList.remove('hidden');
+
+  $('roomLabel').textContent = 'ODA — ' + state.code;
+
+  const titles = {
+    lobby: 'Lobi',
+    night: 'Gece ' + state.round,
+    day: 'Gündüz ' + state.round,
+    ended: 'Oyun bitti'
+  };
+
+  const phases = {
+    lobby: 'LOBI',
+    night: 'GECE',
+    day: 'GÜNDÜZ',
+    ended: 'SONUÇ'
+  };
+
+  $('phaseTitle').textContent = titles[state.phase];
+  $('phasePill').textContent = phases[state.phase];
+  $('phaseText').textContent = state.message;
+  $('count').textContent = '(' + state.players.length + '/12)';
+
+  $('players').innerHTML = '';
+
+  state.players.forEach((player, index) => {
+    const element = document.createElement('div');
+
+    element.className =
+      'player' +
+      (player.isMe ? ' me' : '') +
+      (!player.alive ? ' dead' : '') +
+      (selected === player.id ? ' selected' : '');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = avatars[index % avatars.length];
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent =
+      player.name +
+      (player.isMe ? ' (Sen)' : '') +
+      (player.isHost ? ' 👑' : '');
+
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+
+    if (!player.alive) {
+      tag.textContent = 'ELENDİ';
+    } else if (state.phase === 'ended') {
+      tag.textContent = player.role;
+    } else {
+      tag.textContent = player.isMe
+        ? (player.role || 'Oyuncu')
+        : 'Oyunda';
+    }
+
+    element.append(avatar, name, tag);
+
+    if (
+      player.alive &&
+      !player.isMe &&
+      (state.phase === 'night' || state.phase === 'day')
+    ) {
+      element.onclick = () => {
+        selected = player.id;
+        render();
+      };
+    }
+
+    $('players').append(element);
+  });
+
+  $('roleArea').classList.toggle(
+    'hidden',
+    !state.myRole || state.phase === 'lobby'
+  );
+
+  if (state.myRole) {
+    $('roleName').textContent = state.myRole;
+
+    if (state.myRole === 'Vampir') {
+      $('roleDesc').textContent =
+        'Gece başka bir oyuncuyu hedefle. Gündüz kimliğini gizle.';
+    } else if (state.myRole === 'Kâhin') {
+      $('roleDesc').textContent =
+        'Gece bir oyuncuyu araştır. Sonucu yalnızca sen görebilirsin.';
+    } else {
+      $('roleDesc').textContent =
+        'Tartışmalara katıl ve vampirleri oylamayla bul.';
+    }
+
+    $('privateMessage').textContent = state.nightResult || '';
+  }
+
+  $('actions').innerHTML = '';
+
+  if (state.phase === 'lobby') {
+    if (state.canStart) {
+      addButton('🌙 Oyunu başlat', 'gold', () => {
+        socket.emit('startGame');
+      });
+    } else {
+      $('actions').insertAdjacentHTML(
+        'beforeend',
+        '<span class="hint">Oda sahibi oyunu başlatacak. En az 5 oyuncu gerekli.</span>'
+      );
+    }
+
+    addButton('🚪 Odadan ayrıl', 'secondary', leaveRoom);
+  }
+
+  if (state.phase === 'night') {
+    if (state.myAlive && selected) {
+      if (state.myRole === 'Vampir') {
+        addButton('🩸 Bu kişiyi hedefle', 'primary', () => {
+          socket.emit('nightAction', {
+            targetId: selected,
+            action: 'kill'
+          });
+        });
+      } else if (state.myRole === 'Kâhin') {
+        addButton('🔮 Araştır', 'gold', () => {
+          socket.emit('nightAction', {
+            targetId: selected,
+            action: 'inspect'
+          });
+        });
+      }
+    }
+
+    addButton('🚪 Odadan ayrıl', 'secondary', leaveRoom);
+  }
+
+  if (state.phase === 'day') {
+    if (state.myAlive && selected) {
+      addButton('⚖️ Bu kişiye oy ver', 'primary', () => {
+        socket.emit('vote', { targetId: selected });
+        selected = null;
+      });
+    }
+
+    if (state.myAlive) {
+      addButton('Oy kullanmadan geç', 'secondary', () => {
+        socket.emit('skipVote');
+      });
+    }
+
+    addButton('🚪 Odadan ayrıl', 'secondary', leaveRoom);
+  }
+
+  if (state.phase === 'ended') {
+    addButton('↻ Yeni oyun için menüye dön', 'gold', leaveRoom);
+
+    $('phaseText').textContent =
+      state.message + ' Kazanan: ' + state.winner + '.';
+  }
+
+  $('selectionHint').textContent = selected
+    ? 'Seçili oyuncu: ' +
+      (state.players.find(p => p.id === selected)?.name || '')
+    : 'Gece işlem yapmak veya gündüz oy vermek için bir oyuncuya dokun.';
+
+  renderLog();
+}
+
+function renderLog() {
+  $('log').innerHTML = '';
+
+  events.forEach(event => {
+    const element = document.createElement('div');
+    element.textContent = event.message;
+    $('log').append(element);
+  });
+}
+
+function leaveRoom() {
+  socket.emit('leaveRoom');
+
+  state = null;
+  selected = null;
+  events = [];
+
+  $('game').classList.add('hidden');
+  $('home').classList.remove('hidden');
+  $('log').innerHTML = '<div>Köy meydanı sessiz...</div>';
+}
+</script>
+
+</body>
+</html>
