@@ -2,189 +2,87 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#100d18">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vampir Köylü Online</title>
-
 <style>
-:root {
-  --bg: #100d18;
-  --panel: #1a1525;
-  --red: #e5485d;
-  --gold: #f0c674;
-  --text: #f7f1ff;
-  --muted: #b9afc9;
-  --line: #41324e;
-}
-
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: radial-gradient(ellipse at top, #30203e, #100d18 60%);
-  color: var(--text);
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
+  background: #090711;
+  color: #fff;
   min-height: 100vh;
 }
 
-.wrap {
-  max-width: 900px;
-  margin: auto;
-  padding: 18px 14px 40px;
-}
-
-.top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  font-size: 27px;
-  background: #49223d;
-  padding: 10px;
-  border-radius: 14px;
-}
-
-.brand h1 {
-  font-size: clamp(20px, 5vw, 29px);
-  margin: 0;
-}
-
-.brand p {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 2px 0;
-}
-
-.pill, .phase {
-  font-size: 11px;
-  border: 1px solid #66503a;
-  border-radius: 99px;
-  padding: 7px 10px;
-  color: var(--gold);
-}
-
-.hero, .card {
-  border: 1px solid #42304b;
-  border-radius: 20px;
-  background: #191421ed;
+header {
   padding: 20px;
-  margin-bottom: 15px;
+  text-align: center;
+  background: #170d24;
+  border-bottom: 1px solid #54266e;
 }
 
-.hero {
-  background: linear-gradient(120deg, #2b1a35, #17121f);
-  padding: 26px;
+header h1 {
+  margin: 0;
+  color: #e64cff;
+  font-size: 27px;
 }
 
-.eyebrow {
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: var(--gold);
-  font-weight: 900;
+header p {
+  color: #b9a9c7;
+  margin-bottom: 0;
 }
 
-.hero h2 {
-  font-size: clamp(29px, 7vw, 42px);
-  line-height: 1.05;
-  margin: 8px 0;
+.container {
+  width: 92%;
+  max-width: 700px;
+  margin: 25px auto;
 }
 
-.hero p, .hint {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
+.card {
+  background: #171321;
+  border: 1px solid #382849;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 5px 25px #0005;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+h2 {
+  margin-top: 0;
+  color: #e64cff;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 12px 0;
-}
-
-.field label {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.field input {
-  padding: 13px;
-  background: #100d18;
-  border: 1px solid #493a56;
-  color: white;
-  border-radius: 12px;
-  font: inherit;
+input, button, select {
   width: 100%;
-  outline: none;
+  padding: 13px;
+  margin: 7px 0;
+  border-radius: 8px;
+  border: 1px solid #493657;
+  font-size: 15px;
 }
 
-.field input:focus {
-  border-color: var(--gold);
+input, select {
+  background: #0e0b16;
+  color: white;
 }
 
 button {
-  font: inherit;
-  font-weight: 800;
-  padding: 12px 15px;
-  border: 0;
-  border-radius: 12px;
+  background: #a927c4;
+  color: white;
+  border: none;
+  font-weight: bold;
   cursor: pointer;
 }
 
-.primary {
-  background: linear-gradient(135deg, #ef5267, #a72d55);
-  color: white;
+button:hover {
+  background: #c33be0;
 }
 
-.secondary {
-  background: #30243d;
-  border: 1px solid #51405e;
-  color: white;
-}
-
-.gold {
-  background: var(--gold);
-  color: #261a20;
-}
-
-.buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.buttons button {
-  flex: 1;
-}
-
-.notice {
-  background: #2c2138;
-  border: 1px solid #4b3958;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 12px;
-  color: #ddd0e7;
-  line-height: 1.5;
-  margin: 12px 0;
+button.secondary {
+  background: #30243c;
 }
 
 .hidden {
@@ -192,216 +90,350 @@ button {
 }
 
 .status {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.status h2 {
-  margin: 5px 0;
-  font-size: 24px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #24172e;
+  color: #d9b5e9;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
 }
 
 .players {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
-  gap: 9px;
-  margin: 14px 0;
+  padding: 0;
+  list-style: none;
 }
 
-.player {
-  background: #211a2d;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 12px;
-  text-align: center;
-  cursor: pointer;
-  overflow-wrap: anywhere;
-}
-
-.player.me {
-  border-color: var(--gold);
-}
-
-.player.dead {
-  opacity: .38;
-  filter: grayscale(1);
-}
-
-.player.selected {
-  border-color: var(--red);
-  background: #482136;
-}
-
-.avatar {
-  font-size: 26px;
-}
-
-.name {
-  font-weight: 800;
-  font-size: 13px;
-  margin: 5px 0;
-}
-
-.tag {
-  font-size: 10px;
-  color: var(--muted);
-}
-
-.rolebox {
-  background: linear-gradient(130deg, #37203c, #201729);
-  border: 1px solid #68405d;
-  border-radius: 15px;
-  padding: 16px;
-  margin: 13px 0;
-}
-
-.role {
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--gold);
-}
-
-.log {
-  max-height: 200px;
-  overflow: auto;
-  background: #100d18;
-  border: 1px solid #382b43;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 12px;
-  color: #c9bdd8;
-  line-height: 1.6;
-}
-
-.log div + div {
-  border-top: 1px solid #2b2234;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.footer {
-  text-align: center;
-  color: #766a82;
-  font-size: 11px;
-  margin: 18px;
-}
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 20px;
-  transform: translateX(-50%);
-  background: #f0c674;
-  color: #261a20;
-  padding: 12px 18px;
-  border-radius: 12px;
-  font-weight: 800;
-  z-index: 9;
-  max-width: 90vw;
-  text-align: center;
-}
-
-.chatbox {
-  height: 230px;
-  overflow: auto;
-  background: #100d18;
-  border: 1px solid #382b43;
-  border-radius: 12px;
-  padding: 10px;
-  margin: 10px 0;
-}
-
-.chatline {
-  font-size: 13px;
-  line-height: 1.45;
+.players li {
+  background: #211a2c;
+  padding: 11px;
+  border-radius: 7px;
   margin: 7px 0;
+}
+
+#messages {
+  height: 180px;
+  overflow-y: auto;
+  background: #0c0912;
+  padding: 10px;
+  border-radius: 8px;
   overflow-wrap: anywhere;
 }
 
-.chatline b {
-  color: var(--gold);
+.message {
+  padding: 7px 0;
+  border-bottom: 1px solid #292032;
 }
 
-.chatform {
-  display: flex;
-  gap: 8px;
-}
-
-.chatform input {
-  min-width: 0;
-  flex: 1;
-  background: #100d18;
-  color: white;
-  border: 1px solid #493a56;
-  border-radius: 12px;
-  padding: 12px;
-  font: inherit;
-}
-
-.settingrow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 12px 0;
-}
-
-.settingrow select,
-.settingrow input {
-  background: #100d18;
-  color: white;
-  border: 1px solid #493a56;
-  border-radius: 10px;
-  padding: 10px;
-  font: inherit;
-}
-
-.voicebar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.micstatus {
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #82748d;
   font-size: 12px;
-  color: var(--muted);
-}
-
-.micbtn {
-  background: #2d4738;
-  color: #e4ffed;
-  border: 1px solid #47785a;
-}
-
-.micbtn.off {
-  background: #482136;
-  color: #ffe2e7;
-  border: 1px solid #8c3a55;
-}
-
-@media (max-width: 650px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .hero {
-    padding: 22px;
-  }
-
-  .card {
-    padding: 16px;
-  }
-}
-
-body:not(.authenticated) #appHeader,
-body:not(.authenticated) .hero,
-body:not(.authenticated) #home,
-body:not(.authenticated) #game,
-body:not(.authenticated) .footer {
-  display: none !important;
 }
 </style>
 </head>
+
+<body>
+<header>
+  <h1>🧛 VAMPİR KÖYLÜ</h1>
+  <p>Güven, şüphe ve strateji...</p>
+</header>
+
+<main class="container">
+
+  <section id="loginScreen" class="card">
+    <h2>Oyuna Giriş</h2>
+    <p>Bir kullanıcı adı seç ve maceraya katıl.</p>
+
+    <input id="username"
+      maxlength="20"
+      placeholder="Kullanıcı adın">
+
+    <button id="loginButton">Oyuna Gir</button>
+
+    <div id="loginStatus" class="status">
+      Henüz giriş yapmadın.
+    </div>
+  </section>
+
+  <section id="lobbyScreen" class="hidden">
+
+    <div class="card">
+      <h2>🏠 Oyun Lobisi</h2>
+      <p>Hoş geldin, <strong id="playerName"></strong>!</p>
+
+      <label for="roomCode">Oda kodu</label>
+      <input id="roomCode"
+        maxlength="12"
+        placeholder="Örneğin: K7M2">
+
+      <button id="createRoomButton">Yeni Oda Oluştur</button>
+      <button id="joinRoomButton" class="secondary">
+        Odaya Katıl
+      </button>
+
+      <div id="roomStatus" class="status">
+        Bir oda oluştur veya mevcut odaya katıl.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Oyun Ayarları</h2>
+
+      <label for="vampireCount">Vampir sayısı</label>
+      <select id="vampireCount">
+        <option value="1">1 vampir</option>
+        <option value="2">2 vampir</option>
+        <option value="3">3 vampir</option>
+      </select>
+
+      <label for="seerEnabled">Kâhin rolü</label>
+      <select id="seerEnabled">
+        <option value="yes">Açık</option>
+        <option value="no">Kapalı</option>
+      </select>
+
+      <p class="status">
+        Bu ayarlar şu an yalnızca arayüzde tutuluyor.
+        Sunucuya bağlanınca gerçek oyun kurallarına aktarılacak.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>👥 Oyuncular</h2>
+      <ul id="playerList" class="players"></ul>
+      <button id="startButton">Oyunu Başlat</button>
+    </div>
+
+    <div class="card">
+      <h2>💬 Lobi Sohbeti</h2>
+      <div id="messages"></div>
+      <input id="chatInput" maxlength="300"
+        placeholder="Mesajını yaz...">
+      <button id="sendMessageButton">Mesaj Gönder</button>
+    </div>
+
+    <div class="card">
+      <h2>🎙️ Sesli Sohbet</h2>
+      <p>
+        Sesli sohbet henüz etkin değil. Bunun için oyuncular arasında
+        WebRTC bağlantısı ve sunucu üzerinden eşleştirme kurulmalı.
+      </p>
+      <button class="secondary" disabled>
+        Sesli Sohbet Yakında
+      </button>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="hidden">
+
+    <div class="card">
+      <h2>🌙 Oyun Alanı</h2>
+      <div id="gameStatus" class="status">
+        Oyun henüz başlamadı.
+      </div>
+
+      <h3>Senin rolün</h3>
+      <div id="myRole" class="status">
+        Rolün oyun başladığında belirlenecek.
+      </div>
+
+      <h3>Oyuncular</h3>
+      <ul id="gamePlayerList" class="players"></ul>
+
+      <button id="voteButton">Oy Kullan</button>
+      <button id="leaveButton" class="secondary">
+        Lobiye Dön
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>💬 Oyun Sohbeti</h2>
+      <div id="gameMessages"></div>
+      <input id="gameChatInput" maxlength="300"
+        placeholder="Mesajını yaz...">
+      <button id="sendGameMessageButton">
+        Mesaj Gönder
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Vampir Köylü Online · Geliştirme sürümü
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let currentUser = "";
+let currentRoom = "";
+let isRoomOwner = false;
+let gameStarted = false;
+let localPlayers = [];
+let localMessages = [];
+
+function setStatus(id, text) {
+  $(id).textContent = text;
+}
+
+function addMessage(containerId, username, message) {
+  const row = document.createElement("div");
+  row.className = "message";
+
+  const name = document.createElement("strong");
+  name.textContent = username + ": ";
+
+  const text = document.createElement("span");
+  text.textContent = message;
+
+  row.append(name, text);
+  $(containerId).appendChild(row);
+  $(containerId).scrollTop = $(containerId).scrollHeight;
+}
+
+function renderPlayers() {
+  const list = $("playerList");
+  list.replaceChildren();
+
+  localPlayers.forEach(player => {
+    const li = document.createElement("li");
+    li.textContent = player +
+      (player === currentUser ? " (Sen)" : "");
+    list.appendChild(li);
+  });
+}
+
+function enterLobby() {
+  $("loginScreen").classList.add("hidden");
+  $("lobbyScreen").classList.remove("hidden");
+  $("playerName").textContent = currentUser;
+  renderPlayers();
+}
+
+$("loginButton").addEventListener("click", () => {
+  const name = $("username").value.trim();
+
+  if (name.length < 2) {
+    setStatus("loginStatus",
+      "Kullanıcı adı en az 2 karakter olmalı.");
+    return;
+  }
+
+  currentUser = name;
+  localPlayers = [currentUser];
+
+  enterLobby();
+
+  setStatus("roomStatus",
+    "Giriş yapıldı. Henüz çevrimiçi sunucuya bağlanmadın.");
+});
+
+$("createRoomButton").addEventListener("click", () => {
+  currentRoom = Math.random()
+    .toString(36)
+    .substring(2, 6)
+    .toUpperCase();
+
+  isRoomOwner = true;
+
+  $("roomCode").value = currentRoom;
+
+  setStatus("roomStatus",
+    "Yerel test odası: " + currentRoom +
+    ". Bu oda henüz diğer cihazlara açık değil.");
+
+  addMessage("messages", "Sistem",
+    currentUser + " bir test odası oluşturdu.");
+});
+
+$("joinRoomButton").addEventListener("click", () => {
+  const code = $("roomCode").value.trim().toUpperCase();
+
+  if (!code) {
+    setStatus("roomStatus", "Lütfen oda kodunu yaz.");
+    return;
+  }
+
+  currentRoom = code;
+  isRoomOwner = false;
+
+  setStatus("roomStatus",
+    "Oda kodu kaydedildi: " + currentRoom +
+    ". Çevrimiçi katılım için sunucu bağlantısı gerekli.");
+
+  if (!localPlayers.includes(currentUser)) {
+    localPlayers.push(currentUser);
+  }
+
+  renderPlayers();
+});
+
+$("sendMessageButton").addEventListener("click", () => {
+  const message = $("chatInput").value.trim();
+  if (!message) return;
+
+  addMessage("messages", currentUser, message);
+  $("chatInput").value = "";
+});
+
+$("chatInput").addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    $("sendMessageButton").click();
+  }
+});
+
+$("startButton").addEventListener("click", () => {
+  if (!currentRoom) {
+    setStatus("roomStatus", "Önce bir test odası oluştur.");
+    return;
+  }
+
+  gameStarted = true;
+
+  $("lobbyScreen").classList.add("hidden");
+  $("gameScreen").classList.remove("hidden");
+
+  setStatus("gameStatus",
+    "Test ekranı açıldı. Gerçek çok oyunculu oyun için sunucu bağlantısı gerekiyor.");
+
+  $("myRole").textContent =
+    "Rol henüz sunucu tarafından belirlenmedi.";
+
+  const list = $("gamePlayerList");
+  list.replaceChildren();
+
+  localPlayers.forEach(player => {
+    const li = document.createElement("li");
+    li.textContent = player;
+    list.appendChild(li);
+  });
+});
+
+$("sendGameMessageButton").addEventListener("click", () => {
+  const message = $("gameChatInput").value.trim();
+  if (!message) return;
+
+  addMessage("gameMessages", currentUser, message);
+  $("gameChatInput").value = "";
+});
+
+$("gameChatInput").addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    $("sendGameMessageButton").click();
+  }
+});
+
+$("voteButton").addEventListener("click", () => {
+  alert("Oy verme sistemi henüz sunucuya bağlanmadı.");
+});
+
+$("leaveButton").addEventListener("click", () => {
+  $("gameScreen").classList.add("hidden");
+  $("lobbyScreen").classList.remove("hidden");
+  gameStarted = false;
+});
+</script>
+</body>
+</html>
