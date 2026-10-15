@@ -105,4 +105,345 @@ header h1 {
   margin: 0;
   color: #f1d9f5;
   font-family: Georgia, serif;
-  font-size: clamp(25px,6vw,
+  font-size: clamp(25px,6vw,38px);
+  letter-spacing: 1px;
+  text-shadow: 0 0 22px #a42fc6;
+}
+
+header h1 span {
+  color: var(--red);
+}
+
+header p {
+  margin: 5px 0 8px;
+  color: #d4c0dc;
+  font-size: 14px;
+}
+
+#connectionStatus {
+  display: inline-block;
+  border: 1px solid #63476c;
+  border-radius: 30px;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: rgba(16,10,20,.75);
+}
+
+#scrollRoot {
+  position: absolute;
+  z-index: 1;
+  top: 148px;
+  bottom: calc(var(--navH) + env(safe-area-inset-bottom,0px));
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 14px 24px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+section.page {
+  display: none;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+section.page.active {
+  display: block;
+  animation: appear .22s ease-out;
+}
+
+@keyframes appear {
+  from { opacity: .5; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid rgba(122,76,138,.65);
+  border-radius: 20px;
+  padding: 18px;
+  margin: 0 0 14px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+h2 {
+  font-family: Georgia, serif;
+  font-size: 25px;
+  margin: 0 0 14px;
+  color: #f0dff4;
+  font-weight: 600;
+}
+
+h3 {
+  margin: 17px 0 8px;
+  color: #f0dff4;
+  font-size: 17px;
+}
+
+p {
+  line-height: 1.45;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.status {
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: var(--panel2);
+  color: #e5c9ed;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  margin: 10px 0;
+}
+
+.good { color: #75e7ae !important; }
+.bad { color: #ff6d81 !important; }
+
+label {
+  display: block;
+  margin: 12px 0 5px;
+  color: #e5d5ed;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input, select {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid #5b3b67;
+  border-radius: 12px;
+  background: rgba(8,6,12,.9);
+  color: white;
+  outline: none;
+  margin: 3px 0 7px;
+  font-size: 16px;
+}
+
+input:focus, select:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 2px #d84df02b;
+}
+
+button.action {
+  border: 1px solid #754087;
+  background: linear-gradient(135deg,#9224b5,#59106f);
+  color: white;
+  border-radius: 13px;
+  padding: 13px 14px;
+  font-weight: 800;
+  width: 100%;
+  margin: 5px 0;
+  box-shadow: 0 5px 18px #0003;
+}
+
+button.secondary {
+  background: #2a2031;
+  border-color: #50395a;
+}
+
+button.danger {
+  background: #7f2438;
+  border-color: #a53a51;
+}
+
+button:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero {
+  min-height: 190px;
+  border-radius: 18px;
+  padding: 20px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background:
+    linear-gradient(0deg,rgba(7,4,10,.95),rgba(7,4,10,.05)),
+    url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=85")
+    center 48%/cover;
+  border: 1px solid #6d477a;
+  box-shadow: inset 0 0 40px #0008;
+}
+
+.hero .eyebrow {
+  color: #f19bff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.hero h2 {
+  font-size: 29px;
+  margin: 4px 0;
+}
+
+.hero p {
+  margin: 0;
+  color: #e5d9e9;
+  font-size: 14px;
+}
+
+.scene {
+  height: 130px;
+  border-radius: 15px;
+  margin: 0 0 14px;
+  background:
+    linear-gradient(0deg,rgba(8,5,12,.78),rgba(8,5,12,.05)),
+    url("https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=85")
+    center/cover;
+  border: 1px solid #67436f;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px #000;
+}
+
+.player {
+  background: rgba(40,28,48,.95);
+  border: 1px solid #493452;
+  border-radius: 11px;
+  padding: 11px;
+  margin: 7px 0;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  display: inline-block;
+  background: #4b2b59;
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 11px;
+  margin: 4px 4px 0 0;
+  color: #f4ddfb;
+}
+
+.dead {
+  opacity: .55;
+}
+
+.chatbox {
+  height: 210px;
+  overflow-y: auto;
+  background: rgba(8,5,12,.86);
+  border: 1px solid #34233c;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.chatline, .eventline {
+  padding: 7px 0;
+  border-bottom: 1px solid #302238;
+  overflow-wrap: anywhere;
+}
+
+#adminScreen {
+  border-color: #8e5e28;
+}
+
+#bottomNav {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 2px;
+  height: calc(var(--navH) + env(safe-area-inset-bottom,0px));
+  padding: 6px 8px calc(8px + env(safe-area-inset-bottom,0px));
+  background: rgba(8,5,11,.97);
+  border-top: 1px solid #55365e;
+  box-shadow: 0 -8px 25px #0006;
+}
+
+.navbtn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: #b9a9c2;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 2px;
+}
+
+.navbtn .icon {
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.navbtn.active {
+  background: #351b40;
+  color: #f09dff;
+  box-shadow: 0 0 18px #a72cc133;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#toast {
+  position: fixed;
+  z-index: 30;
+  left: 12px;
+  right: 12px;
+  top: calc(env(safe-area-inset-top,0px) + 12px);
+  padding: 12px;
+  background: #2d1836;
+  border: 1px solid #80518c;
+  border-radius: 12px;
+  display: none;
+}
+
+@media(min-width:700px) {
+  #scrollRoot {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  header h1 {
+    font-size: 38px;
+  }
+}
+
+@media(max-height:650px) {
+  header {
+    padding-bottom: 7px;
+  }
+  header p {
+    display: none;
+  }
+  #scrollRoot {
+    top: 100px;
+  }
+}
+</style>
+</head>
