@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#100d18">
+<title>Vampir Köylü Online</title>
+
+<style>
+:root {
+  --bg: #100d18;
+  --panel: #1a1525;
+  --red: #e5485d;
+  --gold: #f0c674;
+  --text: #f7f1ff;
+  --muted: #b9afc9;
+  --line: #41324e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at top, #30203e, #100d18 60%);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: auto;
+  padding: 18px 14px 40px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  font-size: 27px;
+  background: #49223d;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.brand h1 {
+  font-size: clamp(20px, 5vw, 29px);
+  margin: 0;
+}
+
+.brand p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 2px 0;
+}
+
+.pill, .phase {
+  font-size: 11px;
+  border: 1px solid #66503a;
+  border-radius: 99px;
+  padding: 7px 10px;
+  color: var(--gold);
+}
+
+.hero, .card {
+  border: 1px solid #42304b;
+  border-radius: 20px;
+  background: #191421ed;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.hero {
+  background: linear-gradient(120deg, #2b1a35, #17121f);
+  padding: 26px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.hero h2 {
+  font-size: clamp(29px, 7vw, 42px);
+  line-height: 1.05;
+  margin: 8px 0;
+}
+
+.hero p, .hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.field label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.field input {
+  padding: 13px;
+  background: #100d18;
+  border: 1px solid #493a56;
+  color: white;
+  border-radius: 12px;
+  font: inherit;
+  width: 100%;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: var(--gold);
+}
+
+button {
+  font: inherit;
+  font-weight: 800;
+  padding: 12px 15px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.primary {
+  background: linear-gradient(135deg, #ef5267, #a72d55);
+  color: white;
+}
+
+.secondary {
+  background: #30243d;
+  border: 1px solid #51405e;
+  color: white;
+}
+
+.gold {
+  background: var(--gold);
+  color: #261a20;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.buttons button {
+  flex: 1;
+}
+
+.notice {
+  background: #2c2138;
+  border: 1px solid #4b3958;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  color: #ddd0e7;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.status h2 {
+  margin: 5px 0;
+  font-size: 24px;
+}
+
+.players {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 9px;
+  margin: 14px 0;
+}
+
+.player {
+  background: #211a2d;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.player.me {
+  border-color: var(--gold);
+}
+
+.player.dead {
+  opacity: .38;
+  filter: grayscale(1);
+}
+
+.player.selected {
+  border-color: var(--red);
+  background: #482136;
+}
+
+.avatar {
+  font-size: 26px;
+}
+
+.name {
+  font-weight: 800;
+  font-size: 13px;
+  margin: 5px 0;
+}
+
+.tag {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.rolebox {
+  background: linear-gradient(130deg, #37203c, #201729);
+  border: 1px solid #68405d;
+  border-radius: 15px;
+  padding: 16px;
+  margin: 13px 0;
+}
+
+.role {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.log {
+  max-height: 200px;
+  overflow: auto;
+  background: #100d18;
+  border: 1px solid #382b43;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  color: #c9bdd8;
+  line-height: 1.6;
+}
+
+.log div + div {
+  border-top: 1px solid #2b2234;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.footer {
+  text-align: center;
+  color: #766a82;
+  font-size: 11px;
+  margin: 18px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  background: #f0c674;
+  color: #261a20;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  z-index: 9;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.chatbox {
+  height: 230px;
+  overflow: auto;
+  background: #100d18;
+  border: 1px solid #382b43;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.chatline {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 7px 0;
+  overflow-wrap: anywhere;
+}
+
+.chatline b {
+  color: var(--gold);
+}
+
+.chatform {
+  display: flex;
+  gap: 8px;
+}
+
+.chatform input {
+  min-width: 0;
+  flex: 1;
+  background: #100d18;
+  color: white;
+  border: 1px solid #493a56;
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+}
+
+.settingrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.settingrow select,
+.settingrow input {
+  background: #100d18;
+  color: white;
+  border: 1px solid #493a56;
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+}
+
+.voicebar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.micstatus {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.micbtn {
+  background: #2d4738;
+  color: #e4ffed;
+  border: 1px solid #47785a;
+}
+
+.micbtn.off {
+  background: #482136;
+  color: #ffe2e7;
+  border: 1px solid #8c3a55;
+}
+
+@media (max-width: 650px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 22px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
+
+body:not(.authenticated) #appHeader,
+body:not(.authenticated) .hero,
+body:not(.authenticated) #home,
+body:not(.authenticated) #game,
+body:not(.authenticated) .footer {
+  display: none !important;
+}
+</style>
+</head>
