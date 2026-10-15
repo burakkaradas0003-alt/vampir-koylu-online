@@ -2,438 +2,772 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vampir Köylü Online</title>
 <style>
-* {
-  box-sizing: border-box;
+:root {
+  --bg:#0a0710;
+  --panel:#17121f;
+  --panel2:#21182c;
+  --border:#453052;
+  --accent:#c33be0;
+  --text:#fff;
+  --muted:#c4b4d0;
+  --green:#51d99a;
+  --red:#ff657a;
 }
-
+* { box-sizing:border-box; }
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #090711;
-  color: #fff;
-  min-height: 100vh;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  font-size:16px;
 }
-
 header {
-  padding: 20px;
-  text-align: center;
-  background: #170d24;
-  border-bottom: 1px solid #54266e;
+  text-align:center;
+  padding:22px 12px;
+  background:#170d23;
+  border-bottom:1px solid var(--border);
 }
-
 header h1 {
-  margin: 0;
-  color: #e64cff;
-  font-size: 27px;
+  color:#df55f5;
+  margin:0;
+  font-size:28px;
 }
-
-header p {
-  color: #b9a9c7;
-  margin-bottom: 0;
-}
-
-.container {
-  width: 92%;
-  max-width: 700px;
-  margin: 25px auto;
-}
-
+header p { color:var(--muted); margin-bottom:0; }
+.container { width:94%; max-width:760px; margin:20px auto; }
 .card {
-  background: #171321;
-  border: 1px solid #382849;
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 5px 25px #0005;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:19px;
+  margin-bottom:17px;
 }
-
-h2 {
-  margin-top: 0;
-  color: #e64cff;
+h2 { color:#df55f5; margin-top:0; }
+h3 { color:#e9d7f5; }
+p { line-height:1.5; }
+input,select,button {
+  width:100%;
+  padding:13px;
+  margin:6px 0;
+  border-radius:9px;
+  font-size:16px;
 }
-
-input, button, select {
-  width: 100%;
-  padding: 13px;
-  margin: 7px 0;
-  border-radius: 8px;
-  border: 1px solid #493657;
-  font-size: 15px;
+input,select {
+  color:white;
+  background:#0d0913;
+  border:1px solid var(--border);
 }
-
-input, select {
-  background: #0e0b16;
-  color: white;
-}
-
 button {
-  background: #a927c4;
-  color: white;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
+  color:white;
+  background:#a72cc1;
+  border:0;
+  font-weight:bold;
+  cursor:pointer;
 }
-
-button:hover {
-  background: #c33be0;
-}
-
-button.secondary {
-  background: #30243c;
-}
-
-.hidden {
-  display: none !important;
-}
-
+button.secondary { background:#33243f; }
+button.danger { background:#8d263e; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+.hidden { display:none !important; }
+.muted { color:var(--muted); }
 .status {
-  padding: 12px;
-  border-radius: 8px;
-  background: #24172e;
-  color: #d9b5e9;
-  margin: 12px 0;
-  overflow-wrap: anywhere;
+  padding:12px;
+  border-radius:9px;
+  background:var(--panel2);
+  color:#e3c9ef;
+  overflow-wrap:anywhere;
+  margin:10px 0;
 }
-
-.players {
-  padding: 0;
-  list-style: none;
+.good { color:var(--green); }
+.bad { color:var(--red); }
+.player {
+  padding:12px;
+  margin:7px 0;
+  border-radius:9px;
+  background:#211a2b;
+  overflow-wrap:anywhere;
 }
-
-.players li {
-  background: #211a2c;
-  padding: 11px;
-  border-radius: 7px;
-  margin: 7px 0;
+.player.dead { opacity:.5; }
+.badge {
+  display:inline-block;
+  font-size:12px;
+  background:#392344;
+  border-radius:6px;
+  padding:4px 7px;
+  margin:4px;
 }
-
-#messages {
-  height: 180px;
-  overflow-y: auto;
-  background: #0c0912;
-  padding: 10px;
-  border-radius: 8px;
-  overflow-wrap: anywhere;
+#chatMessages,#gameChatMessages,#eventList {
+  height:190px;
+  overflow-y:auto;
+  padding:10px;
+  background:#0d0913;
+  border-radius:9px;
 }
-
-.message {
-  padding: 7px 0;
-  border-bottom: 1px solid #292032;
+.chatline,.eventline {
+  padding:7px 0;
+  border-bottom:1px solid #302338;
+  overflow-wrap:anywhere;
 }
-
+label { display:block; margin-top:10px; color:#e7d7ef; }
+hr { border:0; border-top:1px solid var(--border); margin:18px 0; }
 footer {
-  text-align: center;
-  padding: 20px;
-  color: #82748d;
-  font-size: 12px;
+  text-align:center;
+  padding:20px;
+  color:#8f809b;
+  font-size:12px;
 }
 </style>
 </head>
-
 <body>
+
 <header>
   <h1>🧛 VAMPİR KÖYLÜ</h1>
   <p>Güven, şüphe ve strateji...</p>
+  <p id="connectionStatus">Sunucuya bağlanılıyor...</p>
 </header>
 
 <main class="container">
 
-  <section id="loginScreen" class="card">
-    <h2>Oyuna Giriş</h2>
-    <p>Bir kullanıcı adı seç ve maceraya katıl.</p>
+<section id="authScreen" class="card">
+  <h2>🔐 Hesap Girişi</h2>
+  <p class="muted">Giriş yap veya yeni hesap oluştur.</p>
 
-    <input id="username"
-      maxlength="20"
-      placeholder="Kullanıcı adın">
+  <label for="authUsername">Kullanıcı adı</label>
+  <input id="authUsername" maxlength="24"
+    autocomplete="username" placeholder="Kullanıcı adın">
 
-    <button id="loginButton">Oyuna Gir</button>
+  <label for="authPassword">Şifre</label>
+  <input id="authPassword" type="password" maxlength="128"
+    autocomplete="current-password" placeholder="Şifren">
 
-    <div id="loginStatus" class="status">
-      Henüz giriş yapmadın.
+  <button id="loginBtn">Giriş Yap</button>
+  <button id="registerBtn" class="secondary">Hesap Oluştur</button>
+  <div id="authStatus" class="status">Hesabınla giriş yap.</div>
+</section>
+
+<section id="lobbyScreen" class="hidden">
+
+  <div class="card">
+    <h2>👤 Hesabım</h2>
+    <p>Oyuncu: <strong id="accountName"></strong></p>
+    <p id="accountRole" class="muted"></p>
+    <button id="logoutBtn" class="secondary">Çıkış Yap</button>
+  </div>
+
+  <div class="card">
+    <h2>🏠 Oyun Lobisi</h2>
+
+    <label for="displayName">Oyuncu adı</label>
+    <input id="displayName" maxlength="18" placeholder="Oyunda görünecek ad">
+
+    <button id="createRoomBtn">Yeni Oda Oluştur</button>
+
+    <hr>
+
+    <label for="joinCode">Oda kodu</label>
+    <input id="joinCode" maxlength="12" placeholder="Oda kodu">
+    <button id="joinRoomBtn" class="secondary">Odaya Katıl</button>
+
+    <div id="lobbyStatus" class="status">
+      Oda oluştur veya bir odaya katıl.
     </div>
-  </section>
+  </div>
 
-  <section id="lobbyScreen" class="hidden">
+  <div id="settingsCard" class="card hidden">
+    <h2>⚙️ Oyun Ayarları</h2>
 
-    <div class="card">
-      <h2>🏠 Oyun Lobisi</h2>
-      <p>Hoş geldin, <strong id="playerName"></strong>!</p>
+    <label for="vampires">Vampir sayısı</label>
+    <select id="vampires">
+      <option value="1">1 vampir</option>
+      <option value="2">2 vampir</option>
+      <option value="3">3 vampir</option>
+    </select>
 
-      <label for="roomCode">Oda kodu</label>
-      <input id="roomCode"
-        maxlength="12"
-        placeholder="Örneğin: K7M2">
+    <label for="seer">Kâhin rolü</label>
+    <select id="seer">
+      <option value="yes">Açık</option>
+      <option value="no">Kapalı</option>
+    </select>
 
-      <button id="createRoomButton">Yeni Oda Oluştur</button>
-      <button id="joinRoomButton" class="secondary">
-        Odaya Katıl
-      </button>
+    <label for="bots">Test botları</label>
+    <select id="bots">
+      <option value="0">Bot yok</option>
+      <option value="1">1 bot</option>
+      <option value="2">2 bot</option>
+      <option value="3">3 bot</option>
+      <option value="4">4 bot</option>
+      <option value="5">5 bot</option>
+      <option value="6">6 bot</option>
+      <option value="7">7 bot</option>
+    </select>
 
-      <div id="roomStatus" class="status">
-        Bir oda oluştur veya mevcut odaya katıl.
-      </div>
+    <button id="saveSettingsBtn">Ayarları Kaydet</button>
+  </div>
+
+  <div class="card">
+    <h2>👥 Oyuncular</h2>
+    <div id="roomInfo" class="status">Henüz bir odada değilsin.</div>
+    <div id="playersList"></div>
+    <button id="startGameBtn">🎮 Oyunu Başlat</button>
+    <button id="leaveRoomBtn" class="secondary">Odadan Ayrıl</button>
+  </div>
+
+  <div class="card">
+    <h2>💬 Lobi Sohbeti</h2>
+    <div id="chatMessages"></div>
+    <input id="chatInput" maxlength="300" placeholder="Mesajını yaz...">
+    <button id="sendChatBtn">Mesaj Gönder</button>
+  </div>
+</section>
+
+<section id="gameScreen" class="hidden">
+  <div class="card">
+    <h2>🌙 Oyun Alanı</h2>
+    <div id="gameStatus" class="status"></div>
+
+    <h3>🎭 Senin rolün</h3>
+    <div id="myRole" class="status">Rol bekleniyor...</div>
+
+    <h3>👥 Oyuncular</h3>
+    <div id="gamePlayers"></div>
+
+    <div id="nightActions" class="hidden">
+      <h3>🌙 Gece işlemleri</h3>
+      <p id="nightHelp" class="muted"></p>
     </div>
 
-    <div class="card">
-      <h2>⚙️ Oyun Ayarları</h2>
-
-      <label for="vampireCount">Vampir sayısı</label>
-      <select id="vampireCount">
-        <option value="1">1 vampir</option>
-        <option value="2">2 vampir</option>
-        <option value="3">3 vampir</option>
-      </select>
-
-      <label for="seerEnabled">Kâhin rolü</label>
-      <select id="seerEnabled">
-        <option value="yes">Açık</option>
-        <option value="no">Kapalı</option>
-      </select>
-
-      <p class="status">
-        Bu ayarlar şu an yalnızca arayüzde tutuluyor.
-        Sunucuya bağlanınca gerçek oyun kurallarına aktarılacak.
-      </p>
+    <div id="dayActions" class="hidden">
+      <h3>⚖️ Gündüz oylaması</h3>
+      <button id="skipVoteBtn" class="secondary">Oy Kullanmayı Pas Geç</button>
     </div>
 
-    <div class="card">
-      <h2>👥 Oyuncular</h2>
-      <ul id="playerList" class="players"></ul>
-      <button id="startButton">Oyunu Başlat</button>
-    </div>
+    <div id="privateMessage" class="status hidden"></div>
+    <div id="winnerMessage" class="status hidden"></div>
 
-    <div class="card">
-      <h2>💬 Lobi Sohbeti</h2>
-      <div id="messages"></div>
-      <input id="chatInput" maxlength="300"
-        placeholder="Mesajını yaz...">
-      <button id="sendMessageButton">Mesaj Gönder</button>
-    </div>
+    <button id="backToLobbyBtn" class="secondary">Lobiye Dön</button>
+  </div>
 
-    <div class="card">
-      <h2>🎙️ Sesli Sohbet</h2>
-      <p>
-        Sesli sohbet henüz etkin değil. Bunun için oyuncular arasında
-        WebRTC bağlantısı ve sunucu üzerinden eşleştirme kurulmalı.
-      </p>
-      <button class="secondary" disabled>
-        Sesli Sohbet Yakında
-      </button>
-    </div>
-  </section>
+  <div class="card">
+    <h2>💬 Oyun Sohbeti</h2>
+    <div id="gameChatMessages"></div>
+    <input id="gameChatInput" maxlength="300" placeholder="Mesajını yaz...">
+    <button id="sendGameChatBtn">Mesaj Gönder</button>
+  </div>
+</section>
 
-  <section id="gameScreen" class="hidden">
+<section id="adminScreen" class="hidden">
+  <div class="card">
+    <h2>👑 Game Master Paneli</h2>
 
-    <div class="card">
-      <h2>🌙 Oyun Alanı</h2>
-      <div id="gameStatus" class="status">
-        Oyun henüz başlamadı.
-      </div>
+    <button id="refreshUsersBtn">Hesapları Göster</button>
+    <div id="adminUsers"></div>
 
-      <h3>Senin rolün</h3>
-      <div id="myRole" class="status">
-        Rolün oyun başladığında belirlenecek.
-      </div>
+    <hr>
 
-      <h3>Oyuncular</h3>
-      <ul id="gamePlayerList" class="players"></ul>
+    <h3>Oyuncu yetkisi</h3>
+    <input id="roleUsername" placeholder="Kullanıcı adı">
+    <select id="newRole">
+      <option value="player">Normal oyuncu</option>
+      <option value="moderator">Moderatör</option>
+    </select>
+    <button id="setRoleBtn">Yetkiyi Güncelle</button>
 
-      <button id="voteButton">Oy Kullan</button>
-      <button id="leaveButton" class="secondary">
-        Lobiye Dön
-      </button>
-    </div>
+    <hr>
 
-    <div class="card">
-      <h2>💬 Oyun Sohbeti</h2>
-      <div id="gameMessages"></div>
-      <input id="gameChatInput" maxlength="300"
-        placeholder="Mesajını yaz...">
-      <button id="sendGameMessageButton">
-        Mesaj Gönder
-      </button>
-    </div>
-  </section>
+    <h3>Aktif odalar</h3>
+    <button id="refreshRoomsBtn">Odaları Göster</button>
+    <div id="adminRooms"></div>
+  </div>
+</section>
+
+<div class="card">
+  <h2>📜 Oyun Olayları</h2>
+  <div id="eventList"></div>
+</div>
 
 </main>
 
-<footer>
-  Vampir Köylü Online · Geliştirme sürümü
-</footer>
+<footer>Vampir Köylü Online</footer>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 
-let currentUser = "";
-let currentRoom = "";
-let isRoomOwner = false;
-let gameStarted = false;
-let localPlayers = [];
-let localMessages = [];
+let token = localStorage.getItem("vk_token") || "";
+let account = null;
+let socket = null;
+let state = null;
 
-function setStatus(id, text) {
-  $(id).textContent = text;
+function show(id, visible) {
+  $(id).classList.toggle("hidden", !visible);
 }
 
-function addMessage(containerId, username, message) {
-  const row = document.createElement("div");
-  row.className = "message";
+function status(id, message, good = false) {
+  $(id).textContent = message;
+  $(id).classList.toggle("good", good);
+  $(id).classList.toggle("bad", !good);
+}
+
+async function api(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "İşlem başarısız.");
+  }
+
+  return data;
+}
+
+async function authenticate(mode) {
+  const username = $("authUsername").value.trim();
+  const password = $("authPassword").value;
+
+  if (!username || !password) {
+    status("authStatus", "Kullanıcı adı ve şifre gerekli.");
+    return;
+  }
+
+  try {
+    const data = await api(
+      mode === "register" ? "/api/register" : "/api/login",
+      {username, password}
+    );
+
+    token = data.token;
+    account = data.account;
+    localStorage.setItem("vk_token", token);
+    connectSocket();
+  } catch (error) {
+    status("authStatus", error.message);
+  }
+}
+
+$("loginBtn").onclick = () => authenticate("login");
+$("registerBtn").onclick = () => authenticate("register");
+
+$("authPassword").addEventListener("keydown", event => {
+  if (event.key === "Enter") authenticate("login");
+});
+
+function connectSocket() {
+  if (socket) socket.disconnect();
+
+  socket = io({auth:{token}});
+
+  socket.on("connect", () => {
+    $("connectionStatus").textContent = "🟢 Sunucuya bağlı";
+    show("authScreen", false);
+    show("lobbyScreen", true);
+
+    $("accountName").textContent = account.username;
+    $("displayName").value = account.username;
+
+    $("accountRole").textContent =
+      account.role === "gameMaster" ? "👑 Game Master" :
+      account.role === "moderator" ? "🛡️ Moderatör" : "Oyuncu";
+
+    if (account.role === "gameMaster") {
+      show("adminScreen", true);
+      socket.emit("adminGetUsers");
+      socket.emit("adminGetRooms");
+    } else {
+      show("adminScreen", false);
+    }
+
+    status("lobbyStatus", "Sunucuya bağlandın. Oda oluşturabilirsin.", true);
+  });
+
+  socket.on("connect_error", error => {
+    $("connectionStatus").textContent = "🔴 Bağlantı hatası";
+
+    if (error.message === "Giriş gerekli") {
+      localStorage.removeItem("vk_token");
+      token = "";
+      show("authScreen", true);
+      show("lobbyScreen", false);
+      status("authStatus", "Oturum geçersiz. Yeniden giriş yap.");
+    } else {
+      status("authStatus", "Sunucuya bağlanılamadı. Biraz sonra tekrar dene.");
+      show("authScreen", true);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    $("connectionStatus").textContent = "🟠 Bağlantı kesildi";
+  });
+
+  socket.on("state", updateState);
+
+  socket.on("toast", message => {
+    status(state && state.phase !== "lobby" ? "gameStatus" : "lobbyStatus",
+      message || "Bilgi");
+  });
+
+  socket.on("chatMessage", item => {
+    addChat("chatMessages", item);
+    addChat("gameChatMessages", item);
+  });
+
+  socket.on("events", events => {
+    const box = $("eventList");
+    box.replaceChildren();
+
+    (events || []).forEach(event => {
+      const line = document.createElement("div");
+      line.className = "eventline";
+      line.textContent = event.message;
+      box.appendChild(line);
+    });
+  });
+
+  socket.on("adminUsers", renderAdminUsers);
+  socket.on("adminRooms", renderAdminRooms);
+}
+
+function addChat(containerId, item) {
+  const box = $(containerId);
+  const key = item.id || `${item.at}-${item.name}-${item.message}`;
+
+  if ([...box.children].some(node => node.dataset.key === key)) return;
+
+  const line = document.createElement("div");
+  line.className = "chatline";
+  line.dataset.key = key;
 
   const name = document.createElement("strong");
-  name.textContent = username + ": ";
+  name.textContent = (item.name || "Oyuncu") + ": ";
 
-  const text = document.createElement("span");
-  text.textContent = message;
+  const message = document.createElement("span");
+  message.textContent = item.message || "";
 
-  row.append(name, text);
-  $(containerId).appendChild(row);
-  $(containerId).scrollTop = $(containerId).scrollHeight;
+  line.append(name, message);
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+
+  while (box.children.length > 100) {
+    box.removeChild(box.firstChild);
+  }
 }
 
-function renderPlayers() {
-  const list = $("playerList");
-  list.replaceChildren();
+function renderChat(items) {
+  $("chatMessages").replaceChildren();
+  $("gameChatMessages").replaceChildren();
 
-  localPlayers.forEach(player => {
-    const li = document.createElement("li");
-    li.textContent = player +
-      (player === currentUser ? " (Sen)" : "");
-    list.appendChild(li);
+  (items || []).forEach(item => {
+    addChat("chatMessages", item);
+    addChat("gameChatMessages", item);
   });
 }
 
-function enterLobby() {
-  $("loginScreen").classList.add("hidden");
-  $("lobbyScreen").classList.remove("hidden");
-  $("playerName").textContent = currentUser;
-  renderPlayers();
+function makePlayer(player, phase) {
+  const box = document.createElement("div");
+  box.className = "player" + (player.alive === false ? " dead" : "");
+
+  const title = document.createElement("strong");
+  title.textContent = player.name || "Oyuncu";
+  box.appendChild(title);
+
+  function badge(text) {
+    const el = document.createElement("span");
+    el.className = "badge";
+    el.textContent = text;
+    box.appendChild(el);
+  }
+
+  if (player.isMe) badge("Sen");
+  if (player.isHost) badge("Oda sahibi");
+  if (player.isBot) badge("BOT");
+  if (!player.alive) badge("Elendi");
+  if (player.role) badge("Rol: " + player.role);
+
+  if (phase === "night" && state.myAlive &&
+      player.alive && !player.isMe) {
+
+    if (state.myRole === "Vampir") {
+      const button = document.createElement("button");
+      button.textContent = "🧛 Hedef seç";
+      button.onclick = () => socket.emit("nightAction", {
+        targetId: player.id, action:"kill"
+      });
+      box.appendChild(button);
+    }
+
+    if (state.myRole === "Kâhin") {
+      const button = document.createElement("button");
+      button.textContent = "🔮 Araştır";
+      button.onclick = () => socket.emit("nightAction", {
+        targetId: player.id, action:"inspect"
+      });
+      box.appendChild(button);
+    }
+  }
+
+  if (phase === "day" && state.myAlive &&
+      player.alive && !player.isMe) {
+    const button = document.createElement("button");
+    button.textContent = "⚖️ Oy ver";
+    button.onclick = () => socket.emit("vote", {
+      targetId:player.id
+    });
+    box.appendChild(button);
+  }
+
+  return box;
 }
 
-$("loginButton").addEventListener("click", () => {
-  const name = $("username").value.trim();
+function updateState(data) {
+  state = data;
 
-  if (name.length < 2) {
-    setStatus("loginStatus",
-      "Kullanıcı adı en az 2 karakter olmalı.");
+  show("lobbyScreen", state.phase === "lobby");
+  show("gameScreen", state.phase !== "lobby");
+
+  $("roomInfo").textContent =
+    "Oda: " + state.code +
+    " · Oyuncu sayısı: " + state.players.length +
+    " · Aşama: " + state.phase;
+
+  show("settingsCard",
+    state.phase === "lobby" && state.hostId === state.myId);
+
+  $("vampires").value = String(state.settings.vampires || 1);
+  $("seer").value = state.settings.seer === false ? "no" : "yes";
+  $("bots").value = String(state.settings.bots || 0);
+
+  $("startGameBtn").disabled = !state.canStart;
+
+  $("startGameBtn").textContent = state.canStart
+    ? "🎮 Oyunu Başlat"
+    : "Oyunu Başlat (En az 5 oyuncu)";
+
+  const lobby = $("playersList");
+  lobby.replaceChildren();
+
+  state.players.forEach(player => {
+    lobby.appendChild(makePlayer(player, "lobby"));
+  });
+
+  $("gameStatus").textContent = state.message || "";
+  $("myRole").textContent = state.myRole
+    ? "🎭 " + state.myRole
+    : "Rolün henüz açıklanmadı.";
+
+  const gamePlayers = $("gamePlayers");
+  gamePlayers.replaceChildren();
+
+  state.players.forEach(player => {
+    gamePlayers.appendChild(makePlayer(player, state.phase));
+  });
+
+  show("nightActions", state.phase === "night");
+  show("dayActions", state.phase === "day");
+
+  $("nightHelp").textContent =
+    state.myRole === "Vampir" ? "Bir hedef seç." :
+    state.myRole === "Kâhin" ? "Bir oyuncuyu araştır." :
+    "Bu rol gece işlem yapamaz.";
+
+  show("privateMessage", !!state.nightResult);
+  $("privateMessage").textContent = state.nightResult || "";
+
+  show("winnerMessage", state.phase === "ended");
+  $("winnerMessage").textContent = state.winner
+    ? "🏆 Kazanan: " + state.winner
+    : "";
+
+  renderChat(state.chat || []);
+}
+
+$("createRoomBtn").onclick = () => {
+  if (!socket || !socket.connected) {
+    status("lobbyStatus", "Sunucuya bağlı değilsin.");
     return;
   }
 
-  currentUser = name;
-  localPlayers = [currentUser];
+  socket.emit("createRoom", {
+    name: $("displayName").value.trim()
+  }, result => {
+    if (!result || !result.ok) {
+      status("lobbyStatus", result?.error || "Oda oluşturulamadı.");
+      return;
+    }
 
-  enterLobby();
+    $("joinCode").value = result.code;
+    status("lobbyStatus", "Oda oluşturuldu! Kod: " + result.code, true);
+  });
+};
 
-  setStatus("roomStatus",
-    "Giriş yapıldı. Henüz çevrimiçi sunucuya bağlanmadın.");
-});
-
-$("createRoomButton").addEventListener("click", () => {
-  currentRoom = Math.random()
-    .toString(36)
-    .substring(2, 6)
-    .toUpperCase();
-
-  isRoomOwner = true;
-
-  $("roomCode").value = currentRoom;
-
-  setStatus("roomStatus",
-    "Yerel test odası: " + currentRoom +
-    ". Bu oda henüz diğer cihazlara açık değil.");
-
-  addMessage("messages", "Sistem",
-    currentUser + " bir test odası oluşturdu.");
-});
-
-$("joinRoomButton").addEventListener("click", () => {
-  const code = $("roomCode").value.trim().toUpperCase();
-
-  if (!code) {
-    setStatus("roomStatus", "Lütfen oda kodunu yaz.");
+$("joinRoomBtn").onclick = () => {
+  if (!socket || !socket.connected) {
+    status("lobbyStatus", "Sunucuya bağlı değilsin.");
     return;
   }
 
-  currentRoom = code;
-  isRoomOwner = false;
+  socket.emit("joinRoom", {
+    name: $("displayName").value.trim(),
+    code: $("joinCode").value.trim().toUpperCase()
+  }, result => {
+    if (!result || !result.ok) {
+      status("lobbyStatus", result?.error || "Odaya katılınamadı.");
+      return;
+    }
 
-  setStatus("roomStatus",
-    "Oda kodu kaydedildi: " + currentRoom +
-    ". Çevrimiçi katılım için sunucu bağlantısı gerekli.");
+    status("lobbyStatus", "Odaya katıldın! Kod: " + result.code, true);
+  });
+};
 
-  if (!localPlayers.includes(currentUser)) {
-    localPlayers.push(currentUser);
-  }
+$("saveSettingsBtn").onclick = () => {
+  if (!socket) return;
 
-  renderPlayers();
-});
+  socket.emit("updateSettings", {
+    vampires:Number($("vampires").value),
+    seer:$("seer").value === "yes",
+    bots:Number($("bots").value)
+  });
+};
 
-$("sendMessageButton").addEventListener("click", () => {
-  const message = $("chatInput").value.trim();
-  if (!message) return;
+$("startGameBtn").onclick = () => {
+  if (socket) socket.emit("startGame");
+};
 
-  addMessage("messages", currentUser, message);
-  $("chatInput").value = "";
-});
+$("leaveRoomBtn").onclick = () => {
+  if (!socket) return;
+  socket.emit("leaveRoom");
+  state = null;
+  show("gameScreen", false);
+  show("lobbyScreen", true);
+  status("lobbyStatus", "Odadan ayrıldın.");
+};
+
+$("backToLobbyBtn").onclick = () => {
+  if (!socket) return;
+  socket.emit("leaveRoom");
+  state = null;
+  show("gameScreen", false);
+  show("lobbyScreen", true);
+};
+
+function sendChat(id) {
+  const message = $(id).value.trim();
+  if (!message || !socket) return;
+  socket.emit("chatMessage", {message});
+  $(id).value = "";
+}
+
+$("sendChatBtn").onclick = () => sendChat("chatInput");
+$("sendGameChatBtn").onclick = () => sendChat("gameChatInput");
 
 $("chatInput").addEventListener("keydown", event => {
-  if (event.key === "Enter") {
-    $("sendMessageButton").click();
-  }
-});
-
-$("startButton").addEventListener("click", () => {
-  if (!currentRoom) {
-    setStatus("roomStatus", "Önce bir test odası oluştur.");
-    return;
-  }
-
-  gameStarted = true;
-
-  $("lobbyScreen").classList.add("hidden");
-  $("gameScreen").classList.remove("hidden");
-
-  setStatus("gameStatus",
-    "Test ekranı açıldı. Gerçek çok oyunculu oyun için sunucu bağlantısı gerekiyor.");
-
-  $("myRole").textContent =
-    "Rol henüz sunucu tarafından belirlenmedi.";
-
-  const list = $("gamePlayerList");
-  list.replaceChildren();
-
-  localPlayers.forEach(player => {
-    const li = document.createElement("li");
-    li.textContent = player;
-    list.appendChild(li);
-  });
-});
-
-$("sendGameMessageButton").addEventListener("click", () => {
-  const message = $("gameChatInput").value.trim();
-  if (!message) return;
-
-  addMessage("gameMessages", currentUser, message);
-  $("gameChatInput").value = "";
+  if (event.key === "Enter") sendChat("chatInput");
 });
 
 $("gameChatInput").addEventListener("keydown", event => {
-  if (event.key === "Enter") {
-    $("sendGameMessageButton").click();
-  }
+  if (event.key === "Enter") sendChat("gameChatInput");
 });
 
-$("voteButton").addEventListener("click", () => {
-  alert("Oy verme sistemi henüz sunucuya bağlanmadı.");
-});
+$("skipVoteBtn").onclick = () => {
+  if (socket) socket.emit("skipVote");
+};
 
-$("leaveButton").addEventListener("click", () => {
-  $("gameScreen").classList.add("hidden");
-  $("lobbyScreen").classList.remove("hidden");
-  gameStarted = false;
-});
+$("logoutBtn").onclick = async () => {
+  try {
+    await fetch("/api/logout", {
+      method:"POST",
+      headers:{Authorization:"Bearer " + token}
+    });
+  } catch (_) {}
+
+  if (socket) socket.disconnect();
+
+  localStorage.removeItem("vk_token");
+  token = "";
+  account = null;
+  state = null;
+
+  show("authScreen", true);
+  show("lobbyScreen", false);
+  show("gameScreen", false);
+  show("adminScreen", false);
+  status("authStatus", "Çıkış yapıldı.");
+};
+
+$("refreshUsersBtn").onclick = () => {
+  if (socket) socket.emit("adminGetUsers");
+};
+
+$("refreshRoomsBtn").onclick = () => {
+  if (socket) socket.emit("adminGetRooms");
+};
+
+$("setRoleBtn").onclick = () => {
+  if (!socket) return;
+
+  socket.emit("adminSetRole", {
+    username:$("roleUsername").value.trim(),
+    role:$("newRole").value
+  });
+};
+
+function renderAdminUsers(users) {
+  const box = $("adminUsers");
+  box.replaceChildren();
+
+  (users || []).forEach(user => {
+    const item = document.createElement("div");
+    item.className = "player";
+    item.textContent = user.username + " — " + user.role;
+    box.appendChild(item);
+  });
+}
+
+function renderAdminRooms(rooms) {
+  const box = $("adminRooms");
+  box.replaceChildren();
+
+  (rooms || []).forEach(room => {
+    const item = document.createElement("div");
+    item.className = "player";
+
+    const title = document.createElement("strong");
+    title.textContent = "Oda " + room.code + " — " + room.phase;
+    item.appendChild(title);
+
+    (room.players || []).forEach(player => {
+      const line = document.createElement("p");
+      line.textContent = player.name + " (" + player.username + ")";
+      item.appendChild(line);
+
+      const kick = document.createElement("button");
+      kick.className = "secondary";
+      kick.textContent = "Oyuncuyu çıkar";
+      kick.onclick = () => socket.emit("adminKick", {
+        roomCode:room.code,
+        playerId:player.id
+      });
+      item.appendChild(kick);
+    });
+
+    const close = document.createElement("button");
+    close.className = "danger";
+    close.textContent = "Odayı kapat";
+    close.onclick = () => {
+      if (confirm(room.code + " odası kapatılsın mı?")) {
+        socket.emit("adminCloseRoom", {roomCode:room.code});
+      }
+    };
+
+    item.appendChild(close);
+    box.appendChild(item);
+  });
+}
+
+if (token) connectSocket();
 </script>
 </body>
 </html>
