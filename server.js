@@ -46,13 +46,14 @@ Object.values(DB.users).forEach(u => {
 });
 const banOf = u => { const b = u.ban; if (!b) return null; if (b.u && b.u < now()) { delete u.ban; return null; } return b; };
 const banMsg = b => "Hesabın banlandı" + (b.r ? ": " + b.r : "") + (b.u ? " (" + new Date(b.u).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) + " tarihine kadar)" : " (süresiz)");
-const meOf = u => ({ id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0 });
+const glOn = () => DB.gl !== 0;
+const meOf = u => ({ id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0, gl: glOn() ? 1 : 0 });
 
 const send = (res, code, obj) => { res.writeHead(code, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }); res.end(JSON.stringify(obj)); };
 function body(req) {
   return new Promise(resolve => {
     let d = "", n = 0;
-    req.on("data", c => { n += c.length; if (n > 6e6) { req.destroy(); resolve(null); } else d += c; });
+    req.on("data", c => { n += c.length; if (n > 9e6) { req.destroy(); resolve(null); } else d += c; });
     req.on("end", () => { try { resolve(d ? JSON.parse(d) : {}); } catch (e) { resolve(null); } });
   });
 }
@@ -63,7 +64,13 @@ function authed(req) {
   if (banOf(DB.users[k])) { delete DB.tokens[t]; return null; }
   return { k, u: DB.users[k], t };
 }
-const newToken = k => { const t = crypto.randomBytes(24).toString("hex"); DB.tokens[t] = k; return t; };
+const newToken = k => {
+  // tek oturum: önceki oturumları kapat, "başka yerde açıldı" diye işaretle
+  const kk = (DB.kicked = DB.kicked || {});
+  for (const o in DB.tokens) if (DB.tokens[o] === k) { delete DB.tokens[o]; kk[o] = now(); }
+  const ks = Object.keys(kk); if (ks.length > 500) ks.sort((a, b) => kk[a] - kk[b]).slice(0, ks.length - 500).forEach(x => delete kk[x]);
+  const t = crypto.randomBytes(24).toString("hex"); DB.tokens[t] = k; return t;
+};
 const parse = s => { try { return JSON.parse(s); } catch (e) { return {}; } };
 function summary(u) {
   const st = parse((u.blob || {}).vkstat);
@@ -125,7 +132,7 @@ function roomApi(a, p, q, req, res, b) {
     if (r.pw && r.own !== N && !r.ok[N] && String(b.pw || "") !== r.pw) return send(res, 403, { err: "pw" });
     r.ok[N] = 1; const first = !r.mem[N]; r.mem[N] = now();
     if (r.own === N) r.seats[0] = N;
-    if (first) rchat(r, "join", N);
+    r.jn = r.jn || {}; if (first && !(r.jn[N] && now() - r.jn[N] < 600000)) { rchat(r, "join", N); r.jn[N] = now(); }
     return send(res, 200, { room: pubRoom(r, N), seats: r.seats, mem: Object.keys(r.mem), chat: r.chat.slice(-30), seq: r.cs, rl: rlOf(r) });
   }
   if (r.ban.includes(N)) return send(res, 200, { kicked: 1 });
@@ -156,7 +163,7 @@ function roomApi(a, p, q, req, res, b) {
     res.on("close", () => clearInterval(iv));
     return;
   }
-  if (p === "room/leave") { delete r.mem[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
+  if (p === "room/leave") { delete r.mem[N]; if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
   if (p === "room/chat") {
     const x = String(b.x || "").trim().slice(0, 200); if (!x) return send(res, 400, {});
     if (b.k === "sys") { if (!mgrOf(r, N)) return send(res, 403, {}); rchat(r, "sys", "", x, N); return send(res, 200, {}); }
@@ -245,6 +252,7 @@ function ddRes(r) {
 }
 async function api(req, res, p, q) {
   if (p === "dd") {
+    { const aa = authed(req); if (glOn() && !(aa && aa.u.role)) return send(res, 403, { err: "Bu oyun şu an kilitli.", gl: 1 }); }
     const t = now(), cur = Math.floor(t / DD_T), rs = {};
     for (let r = cur - 9; r <= cur; r++) { if (t >= r * DD_T + DD_CLOSE) rs[r] = ddRes(r); }
     return send(res, 200, { t, cur, rs });
@@ -277,8 +285,14 @@ async function api(req, res, p, q) {
     return send(res, 200, { token: t, user: u.n, blob: u.blob || {}, ...meOf(u) });
   }
   const a = authed(req);
-  if (!a) return send(res, 401, { err: "Oturum geçersiz." });
+  if (!a) { const t0 = (req.headers.authorization || "").replace("Bearer ", ""); return send(res, 401, (DB.kicked || {})[t0] ? { err: "Hesabın başka bir cihazda açıldı.", kick: 1 } : { err: "Oturum geçersiz." }); }
   if (p === "me") { a.u.last = now(); return send(res, 200, { user: a.u.n, blob: a.u.blob || {}, ...meOf(a.u) }); }
+  if (p === "visitors") {
+    const u = a.u, v = u.vis || [], seen = u.visSeen || 0;
+    return send(res, 200, { list: v.slice(0, 100).map(x => { const o = DB.users[key(x.n)], inf = parse(((o || {}).blob || {}).vkinfo); return { n: x.n, t: x.t, g: inf.gen || "", r: inf.reg || "", s: inf.sig || "", role: (o || {}).role || "" }; }), total: u.visN || v.length, nw: v.filter(x => x.t > seen).length });
+  }
+  if (p === "visitors/seen" && req.method === "POST") { a.u.visSeen = now(); save(); return send(res, 200, {}); }
+  if (p === "visitors/clear" && req.method === "POST") { a.u.vis = []; a.u.visSeen = now(); save(); return send(res, 200, {}); }
   if (p === "lk/token" && req.method === "POST") {
     const K = process.env.LIVEKIT_API_KEY, S = process.env.LIVEKIT_API_SECRET, U = process.env.LIVEKIT_URL;
     if (!K || !S || !U) return send(res, 503, { err: "Sesli bağlantı kapalı." });
@@ -296,9 +310,18 @@ async function api(req, res, p, q) {
     return send(res, 200, { sum, n: g.length });
   }
   if (p === "logout") { delete DB.tokens[a.t]; a.u.last = 0; save(); return send(res, 200, {}); }
+  if (p === "pic" && req.method === "POST") {
+    const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
+    a.u.blob = a.u.blob || {};
+    if (b.pic === null || b.pic === "") delete a.u.blob.vkpic;
+    else if (typeof b.pic === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(b.pic) && b.pic.length < 6e6) a.u.blob.vkpic = b.pic;
+    else return send(res, 400, { err: "Fotoğraf geçersiz veya çok büyük." });
+    save(); return send(res, 200, {});
+  }
   if (p === "blob" && req.method === "POST") {
     const b = await body(req); if (!b || typeof b.blob !== "object") return send(res, 400, { err: "Geçersiz." });
-    const o = {}; for (const k in b.blob) if (/^vk[a-z0-9]{1,12}$/.test(k) && typeof b.blob[k] === "string" && b.blob[k].length < 4e6) o[k] = b.blob[k];
+    const o = {}; for (const k in b.blob) if (/^vk[a-z0-9]{1,12}$/.test(k) && typeof b.blob[k] === "string" && b.blob[k].length < (k === "vkpic" ? 6e6 : 4e6)) o[k] = b.blob[k];
+    if (!o.vkpic && (a.u.blob || {}).vkpic) o.vkpic = a.u.blob.vkpic; // profil fotoğrafı yalnızca /api/pic ile değişir/silinir
     a.u.blob = o; save(); return send(res, 200, {});
   }
   if (p === "ping" && req.method === "POST") {
@@ -312,6 +335,12 @@ async function api(req, res, p, q) {
   }
   if (p === "user") {
     const u = q.get("id") ? Object.values(DB.users).find(x => String(x.id) === String(q.get("id"))) : DB.users[key(q.get("n") || "")]; if (!u) return send(res, 404, { err: "Bulunamadı." });
+    if (key(u.n) !== a.k && !q.get("nv")) {
+      const v = (u.vis = u.vis || []), i = v.findIndex(x => x.n === a.u.n);
+      if (i < 0) { u.visN = (u.visN || 0) + 1; v.unshift({ n: a.u.n, t: now() }); }
+      else if (now() - v[i].t > 60000) { const e = v.splice(i, 1)[0]; e.t = now(); v.unshift(e); }
+      if (v.length > 200) v.length = 200;
+    }
     const out = { n: u.n, created: u.created, on: now() - (u.last || 0) < ONLINE_MS, st: u.st || "", id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0 };
     PUB_KEYS.forEach(k => { if ((u.blob || {})[k]) out[k] = u.blob[k]; });
     return send(res, 200, out);
@@ -337,6 +366,7 @@ async function api(req, res, p, q) {
     }
     if (req.method !== "POST") return send(res, 405, { err: "Geçersiz." });
     const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
+    if (p === "admin/gl") { if (myR < 3) return send(res, 403, { err: "Yalnızca kurucu değiştirebilir." }); DB.gl = b.on ? 1 : 0; save(); return send(res, 200, { gl: DB.gl }); }
     const t = b.id ? Object.values(DB.users).find(x => String(x.id) === String(b.id)) : DB.users[key(b.n || "")]; if (!t) return send(res, 404, { err: "Kullanıcı bulunamadı." });
     if (p === "admin/jt") {
       if (myR < 3) return send(res, 403, { err: "Yalnızca kurucu jeton verebilir." });
