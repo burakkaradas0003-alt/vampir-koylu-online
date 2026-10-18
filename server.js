@@ -390,8 +390,9 @@ async function api(req, res, p, q) {
       const l = Math.max(0, Math.min(13, parseInt(b.l) || 0)); t.vl = l; if (!l) delete t.vl;
       save(); return send(res, 200, { n: t.n, ...meOf(t) });
     }
-    if (t === me) return send(res, 403, { err: "Kendi üzerinde işlem yapamazsın." });
-    if (rank(t.role) >= myR) return send(res, 403, { err: "Bu kullanıcı üzerinde yetkin yok." });
+    const selfOk = t === me && myR >= 3 && !/ban|kick|role|del/i.test(p);
+    if (t === me && !selfOk) return send(res, 403, { err: "Kendi üzerinde işlem yapamazsın." });
+    if (!selfOk && rank(t.role) >= myR) return send(res, 403, { err: "Bu kullanıcı üzerinde yetkin yok." });
     if (p === "admin/role") {
       const r = String(b.r || ""); if (r === "kur") return send(res, 403, { err: "Kurucu yetkisini yalnızca ana kurucu verebilir." }); if (!["", "mod", "sup"].includes(r)) return send(res, 400, { err: "Geçersiz yetki." });
       if (r === "sup" && myR < 3) return send(res, 403, { err: "Süper moderatörü yalnızca kurucu atar." });
