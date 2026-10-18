@@ -96,7 +96,8 @@ function rlog(r, k, n, by) { r.log = r.log || []; r.log.unshift({ k, n, by, t: n
 const rlOf = r => { const o = {}; Object.keys(r.mem).concat(r.own).forEach(n => { const u = DB.users[key(n)]; if (u) o[n] = { r: u.role || "", ti: u.titles || [], vl: u.vl || 0 }; }); return o; };
 const mgrOf = (r, n) => r.own === n || r.adm.includes(n);
 const imgUrl = r => { if (!r.img) return null; if (!r._ih || r._ik !== r.img) { r._ik = r.img; r._ih = crypto.createHash("md5").update(r.img).digest("hex").slice(0, 10); } return "/rimg/" + r.id + "?v=" + r._ih; };
-function pubRoom(r, n) { const o = {}; STATIC.forEach(k => o[k] = r[k]); o.img = imgUrl(r); if (!mgrOf(r, n)) o.pw = !!r.pw; if (r.own !== n) o.ban = mgrOf(r, n) ? r.ban : []; return o; }
+function banned(r, n) { if (!r.ban.includes(n)) return false; const t = r.kt && r.kt[n]; if (t && t < now()) { r.ban = r.ban.filter(x => x !== n); delete r.kt[n]; return false; } return true; }
+function pubRoom(r, n) { r.ban.slice().forEach(x => banned(r, x)); const o = {}; STATIC.forEach(k => o[k] = r[k]); o.img = imgUrl(r); if (!mgrOf(r, n)) o.pw = !!r.pw; if (r.own !== n) o.ban = mgrOf(r, n) ? r.ban : []; return o; }
 function rchat(r, k, n, x, f) { const m = { i: ++r.cs, k, n, x, f: f || n, t: now() }; r.chat.push(m); if (r.chat.length > 80) r.chat.splice(0, r.chat.length - 80); return m; }
 function rmStale() { return Object.values(RM); }
 setInterval(() => {
@@ -135,14 +136,14 @@ function roomApi(a, p, q, req, res, b) {
     save(); return send(res, 200, {});
   }
   if (p === "room/join") {
-    if (r.ban.includes(N)) return send(res, 403, { err: "ban" });
+    if (banned(r, N)) return send(res, 403, { err: "ban" });
     if (r.pw && r.own !== N && !r.ok[N] && String(b.pw || "") !== r.pw) return send(res, 403, { err: "pw" });
     r.ok[N] = 1; if (r.out) delete r.out[N]; const first = !r.mem[N]; r.mem[N] = now();
     if (r.own === N) r.seats[0] = N;
     r.jn = r.jn || {}; if (first && !(r.jn[N] && now() - r.jn[N] < 600000)) { rchat(r, "join", N); r.jn[N] = now(); }
     return send(res, 200, { room: pubRoom(r, N), seats: r.seats, mem: Object.keys(r.mem), chat: first ? [] : r.chat.slice(-30), seq: r.cs, rl: rlOf(r) });
   }
-  if (r.ban.includes(N)) return send(res, 200, { kicked: 1 });
+  if (banned(r, N)) return send(res, 200, { kicked: 1 });
   if (!r.ok[N] || (r.out && r.out[N])) return send(res, 403, { err: "Önce odaya gir." });
   r.mem[N] = now();
   if (r.own === N) r.seats[0] = N;
@@ -162,7 +163,7 @@ function roomApi(a, p, q, req, res, b) {
     const iv = setInterval(() => {
       if (res.writableEnded || res.destroyed) { clearInterval(iv); return; }
       if (!RM[r.id]) { clearInterval(iv); return send(res, 404, { err: "Oda kapandı.", gone: 1 }); }
-      if (r.ban.includes(N)) { clearInterval(iv); return send(res, 200, { kicked: 1 }); }
+      if (banned(r, N)) { clearInterval(iv); return send(res, 200, { kicked: 1 }); }
       if (r.out && r.out[N]) { clearInterval(iv); return send(res, 403, { err: "Önce odaya gir." }); }
       r.mem[N] = now(); if (r.own === N) r.seats[0] = N;
       const s = snap();
@@ -217,7 +218,7 @@ function roomApi(a, p, q, req, res, b) {
   if (p === "room/down") { if (!mgrOf(r, N)) return send(res, 403, {}); const k = r.seats.indexOf(b.n); if (k > 0 && b.n !== r.own && !(r.adm.includes(b.n) && r.own !== N)) { r.seats[k] = null; rlog(r, "down", b.n, N); } return send(res, 200, {}); }
   if (p === "room/kick") {
     const n = String(b.n || ""); if (!mgrOf(r, N) || n === r.own || n === N || (r.adm.includes(n) && r.own !== N)) return send(res, 403, {});
-    if (!r.ban.includes(n)) { r.ban.push(n); } rlog(r, "kick", n, N); r.adm = r.adm.filter(x => x !== n); delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null;
+    if (!r.ban.includes(n)) { r.ban.push(n); } r.kt = r.kt || {}; r.kt[n] = now() + 600000; rlog(r, "kick", n, N); r.adm = r.adm.filter(x => x !== n); delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null;
     save(); return send(res, 200, {});
   }
   if (p === "room/sig") {
@@ -308,7 +309,7 @@ async function api(req, res, p, q) {
     if (!K || !S || !U) return send(res, 503, { err: "Sesli bağlantı kapalı." });
     const b = await body(req); const id = String((b && b.room) || "");
     const r = RM[id]; if (!r) return send(res, 404, { err: "Oda yok." });
-    if (r.ban && r.ban.includes(a.u.n)) return send(res, 403, { err: "ban" });
+    if (r.ban && banned(r, a.u.n)) return send(res, 403, { err: "ban" });
     const t0 = Math.floor(Date.now() / 1000), b64 = o => Buffer.from(JSON.stringify(o)).toString("base64url");
     const head = b64({ alg: "HS256", typ: "JWT" }), pay = b64({ iss: K, sub: a.u.n, name: a.u.n, nbf: t0 - 10, exp: t0 + 4 * 3600, video: { room: "r_" + id.replace(/[^A-Za-z0-9_-]/g, ""), roomJoin: true, canPublish: true, canSubscribe: true, canPublishData: false } });
     const sig = crypto.createHmac("sha256", S).update(head + "." + pay).digest("base64url");

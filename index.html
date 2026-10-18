@@ -400,6 +400,7 @@ input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(
 .cz .czr.me .czx{display:flex;align-items:flex-end}
 .vo-lv{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#4a35c9;background:#eeeafd;border-radius:9px;padding:3px 8px}
 .rz.tbn .ms-r,.rz.tbn .ms-t,.rz.tbn .ms-l>*{border:0!important;box-shadow:none!important}.rz.tbn .ms-r::after,.rz.tbn .ms-t::after,.rz.tbn .ms-r::before{display:none!important}
+.pvx .cvb.r{right:14px!important}
 .pvx .shs.pfn{gap:0;padding:22px 20px 28px}
 .pvx .pfn .pf-m{margin-top:8px;gap:6px}
 .pvx .pfn .pf-lv,.pvx .pfn .pf-rk,.pvx .pfn .pf-st{font-size:12px!important;padding:3px 9px!important;border-radius:8px!important;font-weight:600}
@@ -1169,7 +1170,7 @@ function auth(){
  const head=`<div class="lg-t"><img class="lg-l" alt="Spenctied" src="${LOGO2}"><h1>SpenctieD</h1><p>Sosyal oyunlar &amp; Sesli sohbetler</p></div>`;
  const body=land?`<div class="lg-b"><button class="lg-bt p" onclick="AT='in';auth()">Kullanıcı girişi</button><button class="lg-bt" onclick="AT='up';auth()">Kayıt ol</button></div>`
  :`<div class="lg-b"><div class="lg-f"><input id="au" maxlength="12" placeholder="Kullanıcı adı" autocomplete="username"><input id="ap" type="password" maxlength="30" placeholder="Şifre" autocomplete="${reg?"new-password":"current-password"}">${reg?`<input id="ap2" type="password" maxlength="30" placeholder="Şifre (tekrar)" autocomplete="new-password">`:""}<div id="ae" class="ae"></div></div><button class="lg-bt p" onclick="authGo()">${reg?"Kayıt ol":"Giriş yap"}</button><button class="lg-bt" onclick="AT='';auth()">Geri</button></div>`;
- $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 494</div></div>`}
+ $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 498</div></div>`}
 var PREVIEW=0;
 const API={tok:(()=>{try{return localStorage.getItem("vktok")||""}catch(e){return""}})()};
 const SYNCK=["vkstat","vkfrm","vkinfo","vkpic","vkjack","vkvipd","vklast","vkfol","vkfr","vkfrq","vkmsg","vkmini","vkmem","vkgift","vkun","vkperm"];
@@ -1879,7 +1880,7 @@ function founderBanner(n){
  document.querySelectorAll(".fbn").forEach(x=>x.remove());
  const o=document.createElement("div");o.className="fbn";o.innerHTML=`<i>${gOf("kral").v}</i><span><em>Kurucu</em> <b>${esc(n)}</b> giriş yaptı</span>`;document.body.appendChild(o);setTimeout(()=>{o.classList.add("out");setTimeout(()=>o.remove(),500)},4200)}
 function kickedModal(name){
- const o=document.createElement("div");o.className="dlg";o.innerHTML=`<div class="dlb"><div class="dli">!</div><b>Odadan atıldınız!</b><p>${esc(name)} odasının admini sizi odadan çıkardı. Odayla bağlantınız kesildi.</p><button class="p" onclick="this.closest('.dlg').remove()">Tamam</button></div>`;document.body.appendChild(o)}
+ const o=document.createElement("div");o.className="dlg";o.innerHTML=`<div class="dlb"><div class="dli">!</div><b>Odadan atıldınız!</b><p>${esc(name)} odasının admini sizi odadan çıkardı. 10 dakika boyunca bu odaya giremezsiniz.</p><button class="p" onclick="this.closest('.dlg').remove()">Tamam</button></div>`;document.body.appendChild(o)}
 function kickMe(){rjDel();const r=CURR;if(!r)return;r.ban=r.ban||[];if(!r.ban.includes(USER))r.ban.push(USER);roomSave();const nm=r.n;clearInterval(RTM);clearInterval(RSP);CURR=null;RBOTS=[];if(MYT&&MYT.id===r.id)MYT=null;tVoice();kickedModal(nm)}
 function roomUnban(n){const r=CURR;r.ban=(r.ban||[]).filter(x=>x!==n);roomSave();roomSet()}
 function roomPeople(){const r=CURR;
@@ -2916,6 +2917,8 @@ roomSave=function(){const r=CURR;if(!roomOn()||!isMgr(r))return;const o={};["n",
  document.addEventListener("touchmove",e=>{if(!ok)return;const t=e.touches[0],dx=t.clientX-sx,dy=Math.abs(t.clientY-sy);if(dy>70&&dy>dx){ok=false;return}if(dx>70&&dy<dx*.7){ok=false;if(can())roomMin()}},{passive:true});
  document.addEventListener("touchend",()=>{ok=false},{passive:true});document.addEventListener("touchcancel",()=>{ok=false},{passive:true})}
 roomPerm=function(){if((statGet().jt||0)<PERM_PRICE){alertBox("Premium oda için "+PERM_PRICE+" jeton gerekli. Jetonun yetersiz.","Jeton yetersiz");return}if(!roomOn()||!isOwn(CURR))return;if((RSV||[]).some(x=>x.perm&&x.own===USER&&x.id!==CURR.id)){alertBox("Sadece 1 premium odan olabilir.");return}jtAdd(-PERM_PRICE);MYT=null;CURR.perm=1;api("room/set",{id:CURR.id,patch:{perm:1}});toast("Oda artık Premium 👑");roomUi()};
+(function(){function keep(){try{if(!(window.LK&&LK.r))return;try{const c=aud();if(c&&c.state!=="running")c.resume()}catch(e){}if(window.VX&&VX.oc&&VX.oc.state==="suspended")VX.oc.resume();Object.values(LK.au||{}).forEach(x=>{try{if(x.paused)x.play().catch(()=>{})}catch(e){}});try{if(navigator.mediaSession){navigator.mediaSession.metadata=new MediaMetadata({title:"Sesli sohbet",artist:"Spenctied"});navigator.mediaSession.playbackState="playing"}}catch(e){}}catch(e){}}
+document.addEventListener("visibilitychange",()=>{keep();setTimeout(keep,300);setTimeout(keep,1500)});addEventListener("pageshow",keep);setInterval(()=>{if(document.hidden)keep()},2000)})();
 addEventListener("pagehide",()=>{if(roomOn()){try{fetch("/api/room/leave",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json",Authorization:"Bearer "+API.tok},body:JSON.stringify({id:CURR.id,ph:1})})}catch(e){}}});
 {const _sim=seatInviteMe;seatInviteMe=function(i,from){_sim(i,from);const o=document.querySelector(".dlg.inv");if(o&&API.tok&&roomOn()){o.querySelector("#ivy").onclick=()=>{o.remove();api("room/seat",{id:CURR.id,i}).then(j=>{if(!j.ok)toast(j.err||"Koltuk artık müsait değil.");roomTick()})}}}}
 /* --- Sesli konuşma (WebRTC) --- */
@@ -2948,7 +2951,7 @@ function lkLoad(){if(window.LivekitClient)return Promise.resolve(true);
  const src=["https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.js","https://unpkg.com/livekit-client@2/dist/livekit-client.umd.js"];
  const one=u=>new Promise(res=>{const s=document.createElement("script");s.src=u;s.onload=()=>res(!!window.LivekitClient);s.onerror=()=>{s.remove();res(false)};document.head.appendChild(s)});
  return one(src[0]).then(ok=>ok||one(src[1]))}
-function lkLeave(){try{if(LK.r)LK.r.disconnect()}catch(e){}Object.values(LK.au).forEach(a=>{try{a.pause();a.srcObject=null;a.remove()}catch(e){}});document.querySelectorAll("audio").forEach(a=>{try{if(!a.isConnected||a.style.display==="none"){a.pause();a.srcObject=null;a.remove()}}catch(e){}});LK.au={};LK.r=null;LK.ok=0;LK.id=null;LK.pub=null;LK.pubT=null}
+function lkLeave(){try{if(LK.r)LK.r.disconnect()}catch(e){}Object.values(LK.au).forEach(a=>{try{a.pause();a.srcObject=null;a.remove()}catch(e){}});document.querySelectorAll("audio").forEach(a=>{try{if(!a.isConnected||a.style.display==="none"){a.pause();a.srcObject=null;a.remove()}}catch(e){}});LK.au={};LK.r=null;LK.ok=0;LK.id=null;LK.pub=null;LK.pubT=null;LK.fail=0}
 async function lkJoin(){
  if(LK.busy||LK.off||!API.tok||!CURR)return;LK.busy=1;const id=CURR.id;
  try{const j=await api("lk/token",{room:id});
@@ -2964,10 +2967,11 @@ async function lkJoin(){
   if(!CURR||CURR.id!==id){room.disconnect();return}
   LK.r=room;LK.id=id;LK.ok=1;try{room.startAudio()}catch(e){}
  }catch(e){LK.fail=Date.now()}finally{LK.busy=0}}
+setInterval(()=>{try{if(!CURR&&(LK.r||LK.ok||LK.id))lkLeave();else if(CURR&&LK.ok&&LK.r){if(LK.r.state==="disconnected"){lkLeave();LK.fail=0}else Object.values(LK.au).forEach(x=>{if(x.paused&&x.srcObject)x.play().catch(()=>{})})}}catch(e){}},500);
 function lkSync(){
  if(!API.tok||!CURR)return 0;
  if(LK.id&&CURR.id!==LK.id)lkLeave();
- if(!LK.ok){if(!LK.busy&&!LK.off&&Date.now()-LK.fail>30000)lkJoin();return 0}
+ if(!LK.ok){if(!LK.busy&&!LK.off&&Date.now()-LK.fail>(LK.fail&&Date.now()-LK.fail<30000?30000:0))lkJoin();return 0}
  const L=window.LivekitClient,room=LK.r;if(!room)return 0;
  Object.keys(VX.pc).forEach(vxClose);
  const mi=RSEAT.indexOf(USER),t=MIC&&MIC.getAudioTracks()[0];
