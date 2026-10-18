@@ -136,13 +136,13 @@ function roomApi(a, p, q, req, res, b) {
   if (p === "room/join") {
     if (r.ban.includes(N)) return send(res, 403, { err: "ban" });
     if (r.pw && r.own !== N && !r.ok[N] && String(b.pw || "") !== r.pw) return send(res, 403, { err: "pw" });
-    r.ok[N] = 1; const first = !r.mem[N]; r.mem[N] = now();
+    r.ok[N] = 1; if (r.out) delete r.out[N]; const first = !r.mem[N]; r.mem[N] = now();
     if (r.own === N) r.seats[0] = N;
     r.jn = r.jn || {}; if (first && !(r.jn[N] && now() - r.jn[N] < 600000)) { rchat(r, "join", N); r.jn[N] = now(); }
     return send(res, 200, { room: pubRoom(r, N), seats: r.seats, mem: Object.keys(r.mem), chat: r.chat.slice(-30), seq: r.cs, rl: rlOf(r) });
   }
   if (r.ban.includes(N)) return send(res, 200, { kicked: 1 });
-  if (!r.ok[N]) return send(res, 403, { err: "Önce odaya gir." });
+  if (!r.ok[N] || (r.out && r.out[N])) return send(res, 403, { err: "Önce odaya gir." });
   r.mem[N] = now();
   if (r.own === N) r.seats[0] = N;
   if (p === "room/sp") { r.sp = r.sp || {}; r.sp[N] = now(); return send(res, 200, {}); }
@@ -162,6 +162,7 @@ function roomApi(a, p, q, req, res, b) {
       if (res.writableEnded || res.destroyed) { clearInterval(iv); return; }
       if (!RM[r.id]) { clearInterval(iv); return send(res, 404, { err: "Oda kapandı.", gone: 1 }); }
       if (r.ban.includes(N)) { clearInterval(iv); return send(res, 200, { kicked: 1 }); }
+      if (r.out && r.out[N]) { clearInterval(iv); return send(res, 403, { err: "Önce odaya gir." }); }
       r.mem[N] = now(); if (r.own === N) r.seats[0] = N;
       const s = snap();
       if (s.h !== hk || now() - t0 > 12000) { clearInterval(iv); out(s); }
@@ -169,7 +170,7 @@ function roomApi(a, p, q, req, res, b) {
     res.on("close", () => clearInterval(iv));
     return;
   }
-  if (p === "room/leave") { if (b.ph) return send(res, 200, {}); /* sayfa yenileme: koltuk ve üyelik korunur, 20 sn içinde dönmezse otomatik düşer */ delete r.mem[N]; if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
+  if (p === "room/leave") { if (b.ph) return send(res, 200, {}); /* sayfa yenileme: koltuk ve üyelik korunur, 20 sn içinde dönmezse otomatik düşer */ delete r.mem[N]; r.out = r.out || {}; r.out[N] = 1; if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
   if (p === "room/chat") {
     const x = String(b.x || "").trim().slice(0, 200); if (!x) return send(res, 400, {});
     if (b.k === "sys") { if (!mgrOf(r, N)) return send(res, 403, {}); rchat(r, "sys", "", x, N); return send(res, 200, {}); }
