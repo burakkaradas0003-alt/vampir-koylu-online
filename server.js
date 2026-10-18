@@ -103,7 +103,8 @@ setInterval(() => {
   const t = now();
   for (const id in RM) {
     const r = RM[id];
-    for (const n in r.mem) if (t - r.mem[n] > 10000) { delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null; }
+    for (const n in r.mem) if (t - r.mem[n] > 10000) { delete r.mem[n]; if (n === r.own) rchat(r, "sys", "", "Oda sahibi odadan ayrıldı.", n); const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null; }
+    if (!r.mem[r.own] && !(r.adm || []).some(x => r.mem[x]) && r.seats.some(Boolean)) r.seats.fill(null);
     if (!r.mem[r.own]) { r.seats[0] = null; if (!r.perm) { r.gone = r.gone || t; if (t - r.gone > 8000) delete RM[id]; } } else r.gone = 0;
   }
 }, 1000);
@@ -170,7 +171,7 @@ function roomApi(a, p, q, req, res, b) {
     res.on("close", () => clearInterval(iv));
     return;
   }
-  if (p === "room/leave") { if (b.ph) { if (r.mem[N]) r.mem[N] = now() + 15000; return send(res, 200, {}); } /* sayfa yenileme: koltuk ve üyelik korunur, 20 sn içinde dönmezse otomatik düşer */ delete r.mem[N]; r.out = r.out || {}; r.out[N] = 1; if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
+  if (p === "room/leave") { if (b.ph) { if (r.mem[N]) r.mem[N] = now() + 15000; return send(res, 200, {}); } /* sayfa yenileme: koltuk ve üyelik korunur, 20 sn içinde dönmezse otomatik düşer */ delete r.mem[N]; r.out = r.out || {}; r.out[N] = 1; if (r.own === N && r.perm) rchat(r, "sys", "", "Oda sahibi odadan ayrıldı.", N); if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
   if (p === "room/chat") {
     const x = String(b.x || "").trim().slice(0, 200); if (!x) return send(res, 400, {});
     if (b.k === "sys") { if (!mgrOf(r, N)) return send(res, 403, {}); rchat(r, "sys", "", x, N); return send(res, 200, {}); }
@@ -188,6 +189,7 @@ function roomApi(a, p, q, req, res, b) {
     if (r.lk.includes(i) || (i === 1 && r.partner === "Kapat")) return send(res, 403, { err: "Bu koltuk kilitli." });
     if (i === 0 && r.own !== N) return send(res, 403, { err: "Bu koltuk oda sahibine ait." });
     if (r.own === N && r.seats[0] === N && i !== 0) return send(res, 403, { err: "Oda sahibi yerinden kalkamaz." });
+    if (!mg && !r.mem[r.own] && !(r.adm || []).some(x => r.mem[x])) return send(res, 403, { err: "Oda sahibi yokken koltuğa oturulamaz." });
     if (r.seats[i] && r.seats[i] !== N) return send(res, 409, { err: "Koltuk dolu." });
     const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; r.seats[i] = N;
     return send(res, 200, { seats: r.seats });
