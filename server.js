@@ -163,7 +163,7 @@ function roomApi(a, p, q, req, res, b) {
     res.on("close", () => clearInterval(iv));
     return;
   }
-  if (p === "room/leave") { delete r.mem[N]; if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
+  if (p === "room/leave") { if (b.ph) return send(res, 200, {}); /* sayfa yenileme: koltuk ve üyelik korunur, 20 sn içinde dönmezse otomatik düşer */ delete r.mem[N]; if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
   if (p === "room/chat") {
     const x = String(b.x || "").trim().slice(0, 200); if (!x) return send(res, 400, {});
     if (b.k === "sys") { if (!mgrOf(r, N)) return send(res, 403, {}); rchat(r, "sys", "", x, N); return send(res, 200, {}); }
