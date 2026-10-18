@@ -425,6 +425,8 @@ input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(
 .pvx .pfn .achb{border-radius:0!important;box-shadow:none!important}
 .vr-off{inset:auto 8px 6px 8px!important;backdrop-filter:none!important;padding:12px 14px!important;gap:10px!important;border-radius:16px!important;background:rgba(20,14,8,.88)!important}.vr-off p{font-size:13px!important}
 .vr-seat.away .av{filter:brightness(.3) grayscale(.6)!important}.vr-seat.away .awp b{font-size:14px!important}
+.rz.tbn .vo-pin{display:inline-flex;align-items:center;gap:4px;background:#eeeafd;color:#4a35c9;font-size:11px;font-weight:700;padding:3px 9px}
+.rz.tbn .vo-n.off{color:#b0aec0;font-size:12px;font-weight:500}
 .vr-pr{position:relative;display:flex;align-items:flex-start}.vr-pr::before{content:'';position:absolute;left:4px;right:4px;top:0;height:62px;border-radius:40px;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.06));box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}.vr-pr>*{position:relative;z-index:1}.vr-pr>.vr-pl{z-index:0}.vr-pr .vr-seat.lock .vr-lk{border-radius:50%;background:rgba(25,8,18,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}.vr-pr .vr-seat.lock .vr-lk svg{stroke:#fff;fill:rgba(255,255,255,.12)}.vr-seat.away .awp{position:relative;display:block}.vr-seat.away .av{filter:brightness(.35) grayscale(.5)}.vr-seat.away .awp b{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fff;font-size:12px;font-weight:800;text-shadow:0 1px 3px #000;pointer-events:none}.vr-seat.occ.spk .av{--w:1}.vsa.own{border-color:#f2b84b!important}
 .vr-e{display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:50%;border:2px solid rgba(190,170,120,.7);background:rgba(0,0,0,.25)}.vr-seat.big .vr-e{width:88px;height:88px}.vr-e svg{width:60%;height:60%;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
 .vr-lk{width:62px;height:62px;display:flex;align-items:center;justify-content:center}.vr-lk svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2}.vr-pl{width:34px;height:14px;flex:none}.vr-pl path{stroke:rgba(255,255,255,.4)}.vr-pl.on path{stroke:#ffd96a;filter:drop-shadow(0 0 5px #ffb84b)}.vr-pl.on{filter:drop-shadow(0 0 6px rgba(255,184,75,.9));animation:plg 1.6s ease-in-out infinite}@keyframes plg{0%,100%{opacity:.75}50%{opacity:1}}.vr-r2 .vr-seat{width:72px}
@@ -1163,7 +1165,7 @@ function auth(){
  const head=`<div class="lg-t"><img class="lg-l" alt="Spenctied" src="${LOGO2}"><h1>SpenctieD</h1><p>Sosyal oyunlar &amp; Sesli sohbetler</p></div>`;
  const body=land?`<div class="lg-b"><button class="lg-bt p" onclick="AT='in';auth()">Kullanıcı girişi</button><button class="lg-bt" onclick="AT='up';auth()">Kayıt ol</button></div>`
  :`<div class="lg-b"><div class="lg-f"><input id="au" maxlength="12" placeholder="Kullanıcı adı" autocomplete="username"><input id="ap" type="password" maxlength="30" placeholder="Şifre" autocomplete="${reg?"new-password":"current-password"}">${reg?`<input id="ap2" type="password" maxlength="30" placeholder="Şifre (tekrar)" autocomplete="new-password">`:""}<div id="ae" class="ae"></div></div><button class="lg-bt p" onclick="authGo()">${reg?"Kayıt ol":"Giriş yap"}</button><button class="lg-bt" onclick="AT='';auth()">Geri</button></div>`;
- $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 482</div></div>`}
+ $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 486</div></div>`}
 var PREVIEW=0;
 const API={tok:(()=>{try{return localStorage.getItem("vktok")||""}catch(e){return""}})()};
 const SYNCK=["vkstat","vkfrm","vkinfo","vkpic","vkjack","vkvipd","vklast","vkfol","vkfr","vkfrq","vkmsg","vkmini","vkmem","vkgift","vkun","vkperm"];
@@ -1181,7 +1183,7 @@ function srvPut(o){if(!o||!o.n)return;const p=SRV[sk(o.n)]||{};SRV[sk(o.n)]={r:o
 function srvMap(m){if(m)Object.keys(m).forEach(n=>srvPut({n,r:m[n].r,ti:m[n].ti,vl:m[n].vl}))}
 /* VIP 13: nick her yerde kırmızı yanıp sönen, içinde parlama gezen yazı */
 function vip13Scan(){try{const set=new Set();Object.keys(SRV).forEach(k=>{if((SRV[k].vl||0)>=13)set.add(k)});if(USER&&vipMy()>=13)set.add(sk(USER));if(!set.size)return;
- const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),arr=[];let n;while(n=w.nextNode()){const t=n.nodeValue.trim();if(t&&t.length<=14&&set.has(t.toLowerCase())){const p=n.parentElement;if(p&&!p.closest(".vip13,script,style,textarea,input,option"))arr.push(n)}}
+ const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),arr=[];let n;while(n=w.nextNode()){const t=n.nodeValue.trim();if(t&&t.length<=14&&set.has(t.toLowerCase())){const p=n.parentElement;if(p&&!p.closest(".vip13,script,style,textarea,input,option,.vo-in>b,.vr-tt>b,.rpn b"))arr.push(n)}}
  arr.forEach(n=>{const sp=document.createElement("span");sp.className="vip13";sp.textContent=n.nodeValue;n.replaceWith(sp)})}catch(e){}}
 {let T13=null;new MutationObserver(()=>{vip13Scan()}).observe(document.body,{childList:true,subtree:true,characterData:true})}
 const mySt=()=>{try{if(JK&&!JK.over&&!JK.spec)return"Jackaroo oynuyor";if(G&&G.p)return"Vampir Köylü oynuyor";if(CURR)return"Sohbet Odasında"}catch(e){}return"Çevrimiçi"};
@@ -1782,7 +1784,7 @@ function rlist(){
  if(RTAB==="benim")l=l.filter(r=>r.own===USER);
  if(RTAB==="pop")l.sort((a,b)=>roomCnt(b)-roomCnt(a));
  const el=document.getElementById("rlist");if(!el)return;
- el.innerHTML=l.length?l.map(r=>`<div class="vo-row" onclick="voiceRoom('${r.id}')">${rAv(r)}<div class="vo-in"><b>${esc(r.n)}</b><div class="vo-tg"><span class="vo-c c${r.cat}">${r.cat}</span><span class="vo-lv">Lv.${rlv(rxp(r)).L}</span><span class="vo-n"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5"/></svg>${roomCnt(r)}</span></div><i>${esc(r.own)}${tk(r.own)}</i></div>${r.perm?`<span class="vo-pin">👑 Premium</span>`:""}${API.tok&&roleOf(USER)==="kur"?`<button class="vo-del" aria-label="Odayı kaldır" onclick="event.stopPropagation();roomKill('${r.id}')"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 12h6l1-12"/></svg></button>`:""}</div>`).join(""):`<div class="rl s" style="text-align:center;margin:30px 0">${RCAT==="Katıl"?"Girdiğin odalar burada görünür.":RCAT==="Takip et"?"Arkadaşlarının odaları burada görünür.":RTAB==="benim"?"Henüz odan yok. Sağ üstteki + ile oda aç.":API.tok?"Şu an açık oda yok. Sağ üstteki + ile ilk odayı sen aç!":"Oda bulunamadı."}</div>`}
+ el.innerHTML=l.length?l.map(r=>`<div class="vo-row" onclick="voiceRoom('${r.id}')">${rAv(r)}<div class="vo-in"><b>${esc(r.n)}</b><div class="vo-tg"><span class="vo-c c${r.cat}">${r.cat}</span><span class="vo-lv">Lv.${rlv(rxp(r)).L}</span>${roomCnt(r)?`<span class="vo-n"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5"/></svg>${roomCnt(r)}</span>`:`<span class="vo-n off">Çevrimdışı</span>`}</div><i>${esc(r.own)}${tk(r.own)}</i></div>${r.perm?`<span class="vo-pin"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>Premium</span>`:""}${API.tok&&roleOf(USER)==="kur"?`<button class="vo-del" aria-label="Odayı kaldır" onclick="event.stopPropagation();roomKill('${r.id}')"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 12h6l1-12"/></svg></button>`:""}</div>`).join(""):`<div class="rl s" style="text-align:center;margin:30px 0">${RCAT==="Katıl"?"Girdiğin odalar burada görünür.":RCAT==="Takip et"?"Arkadaşlarının odaları burada görünür.":RTAB==="benim"?"Henüz odan yok. Sağ üstteki + ile oda aç.":API.tok?"Şu an açık oda yok. Sağ üstteki + ile ilk odayı sen aç!":"Oda bulunamadı."}</div>`}
 function rTab(t){RTAB=t;tVoice()}
 function rCat(c){RCAT=c;tVoice()}
 function rSearch(v){RQ=v;rlist()}
@@ -2842,7 +2844,7 @@ const IC={};const imgCol=(u,w)=>{let r=IC[u];if(!r){IC[u]=r={};const im=new Imag
 /* ===== ONLİNE SESLİ ODALAR ===== */
 var RH="",RDIRTY=0,RTKF=0,RPK=null,RSQ=0,RCHREM=0,VX={pc:{},au:{},an:{}};
 const roomOn=()=>!!(API.tok&&CURR&&CURR.id);
-async function roomsLoad(){if(!API.tok||window.RLB)return;window.RLB=1;let j;try{j=await api("rooms")}finally{window.RLB=0}if(j.ok){const sj=JSON.stringify(j.list);if(sj===window.RSJ&&RSV)return;window.RSJ=sj;RSV=j.list;if(TAB==="voice"&&document.getElementById("rlist")&&!document.getElementById("gf"))rlist()}}
+async function roomsLoad(){if(!API.tok)return;if(window.RLB)return window.RLB;let rs;window.RLB=new Promise(r=>rs=r);let j;try{j=await api("rooms")}finally{window.RLB=0;rs()}if(j.ok){const sj=JSON.stringify(j.list);if(sj===window.RSJ&&RSV)return;window.RSJ=sj;RSV=j.list;if(TAB==="voice"&&document.getElementById("rlist")&&!document.getElementById("gf"))rlist()}}
 setInterval(()=>{if(API.tok&&TAB==="voice"&&!(CURR&&!MINI)&&!document.hidden)roomsLoad()},1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden&&TAB==="voice")roomsLoad()});
 {const o=tVoice;tVoice=function(){o();roomsLoad()}}
 function vrMake(){
@@ -3039,7 +3041,7 @@ setInterval(()=>{if(!window.LOCOK||!API.tok||!USER||(typeof CURR!=="undefined"&&
 function locRestore(){try{const o=JSON.parse(localStorage.getItem(LOCK)||"null");if(!o||!o.t||o.t==="game")return;menu(o.t);if(o.t==="msg"&&o.c&&MG()[o.c])chat(o.c)}catch(e){}}
 async function roomRestore(){let o=null;try{o=JSON.parse(localStorage.getItem(RJ)||"null")}catch(e){}
  if(!o||!o.id||Date.now()-o.t>5*60000){rjDel();return}
- try{TAB="voice";tVoice();await roomsLoad();if(!(RSV||[]).some(r=>r.id===o.id)){rjDel();TAB="game";menu();return}window.NOSLIDE=1;window.JN={[o.id]:1};setTimeout(()=>{window.NOSLIDE=0},4000);voiceRoom(o.id);return 1}catch(e){rjDel()}}
+ try{TAB="voice";tVoice();await roomsLoad();if(!(RSV||[]).some(r=>r.id===o.id)){rjDel();TAB="game";menu();return}window.NOSLIDE=1;window.JN={[o.id]:1};setTimeout(()=>{window.NOSLIDE=0},4000);const j=await api("room/join",{id:o.id});if(!j.ok){rjDel();return}window.RPG="voice";roomEnter(j);roomMin();return 1}catch(e){rjDel()}}
 (async()=>{if(!API.tok){home();return}const j=await api("me");if(j.ok){enter({token:API.tok,user:j.user,blob:j.blob,id:j.id,role:j.role,ti:j.ti});let rr=0;try{rr=await roomRestore()}catch(e){}if(!rr)locRestore();window.LOCOK=1}else{if(j.status===401){API.tok="";try{localStorage.removeItem("vktok")}catch(e){}}home()}})();
 
 /* Kaydırma hareketleri: overlay'de geri, sekmelerde geçiş */
