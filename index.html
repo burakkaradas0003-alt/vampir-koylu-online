@@ -377,6 +377,21 @@ input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(
 .cz .czg{font-size:22px}
 .cz .czsd{width:34px;height:34px}
 .cz .czsd svg{width:18px;height:18px}
+.rz.tbn .vo-row{padding:14px 4px;gap:16px;align-items:center;border-bottom:0!important}
+.rz.tbn .vo-av{width:76px!important;height:76px!important;min-width:76px;border-radius:20px;box-shadow:0 2px 8px rgba(30,25,70,.12)}
+.rz.tbn .vo-in{gap:7px}
+.rz.tbn .vo-in b{font:700 20px/1.15 Georgia,"Times New Roman",serif;color:#16163a;letter-spacing:.2px}
+.rz.tbn .vo-c{font-size:14px;font-weight:500;padding:4px 12px;border-radius:12px}
+.rz.tbn .vo-n{font-size:16px;color:#a5a3b8}
+.rz.tbn .vo-in i{font-size:13px}
+.rz.tbn .vo-pin{top:14px;right:4px}
+.rz.tbn .vo-row .vo-in i{display:none}
+.rz.tbn .vo-in{justify-content:center;gap:8px}
+.rz.tbn .vo-av{box-shadow:none!important;text-shadow:none!important;border:0!important;filter:none!important}
+.rz.tbn .vo-av::before,.rz.tbn .vo-av::after{display:none!important}
+.rz.tbn .vo-c{font-size:11.5px;padding:3px 9px;border-radius:9px}
+.rz.tbn .vo-n{font-size:12px;color:#a5a3b8;display:inline-flex;align-items:center;gap:4px}
+.rz.tbn .vo-n svg{color:#4a35c9;opacity:.7}
 .vr-pr{position:relative;display:flex;align-items:flex-start}.vr-pr::before{content:'';position:absolute;left:4px;right:4px;top:0;height:62px;border-radius:40px;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.06));box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}.vr-pr>*{position:relative;z-index:1}.vr-pr>.vr-pl{z-index:0}.vr-pr .vr-seat.lock .vr-lk{border-radius:50%;background:rgba(25,8,18,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}.vr-pr .vr-seat.lock .vr-lk svg{stroke:#fff;fill:rgba(255,255,255,.12)}.vr-seat.away .awp{position:relative;display:block}.vr-seat.away .av{filter:brightness(.35) grayscale(.5)}.vr-seat.away .awp b{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fff;font-size:12px;font-weight:800;text-shadow:0 1px 3px #000;pointer-events:none}.vr-seat.occ.spk .av{--w:1}.vsa.own{border-color:#f2b84b!important}
 .vr-e{display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:50%;border:2px solid rgba(190,170,120,.7);background:rgba(0,0,0,.25)}.vr-seat.big .vr-e{width:88px;height:88px}.vr-e svg{width:60%;height:60%;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
 .vr-lk{width:62px;height:62px;display:flex;align-items:center;justify-content:center}.vr-lk svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2}.vr-pl{width:34px;height:14px;flex:none}.vr-pl path{stroke:rgba(255,255,255,.4)}.vr-pl.on path{stroke:#ffd96a;filter:drop-shadow(0 0 5px #ffb84b)}.vr-pl.on{filter:drop-shadow(0 0 6px rgba(255,184,75,.9));animation:plg 1.6s ease-in-out infinite}@keyframes plg{0%,100%{opacity:.75}50%{opacity:1}}.vr-r2 .vr-seat{width:72px}
@@ -1115,7 +1130,7 @@ function auth(){
  const head=`<div class="lg-t"><img class="lg-l" alt="Spenctied" src="${LOGO2}"><h1>SpenctieD</h1><p>Sosyal oyunlar &amp; Sesli sohbetler</p></div>`;
  const body=land?`<div class="lg-b"><button class="lg-bt p" onclick="AT='in';auth()">Kullanıcı girişi</button><button class="lg-bt" onclick="AT='up';auth()">Kayıt ol</button></div>`
  :`<div class="lg-b"><div class="lg-f"><input id="au" maxlength="12" placeholder="Kullanıcı adı" autocomplete="username"><input id="ap" type="password" maxlength="30" placeholder="Şifre" autocomplete="${reg?"new-password":"current-password"}">${reg?`<input id="ap2" type="password" maxlength="30" placeholder="Şifre (tekrar)" autocomplete="new-password">`:""}<div id="ae" class="ae"></div></div><button class="lg-bt p" onclick="authGo()">${reg?"Kayıt ol":"Giriş yap"}</button><button class="lg-bt" onclick="AT='';auth()">Geri</button></div>`;
- $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 471</div></div>`}
+ $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 473</div></div>`}
 var PREVIEW=0;
 const API={tok:(()=>{try{return localStorage.getItem("vktok")||""}catch(e){return""}})()};
 const SYNCK=["vkstat","vkfrm","vkinfo","vkpic","vkjack","vkvipd","vklast","vkfol","vkfr","vkfrq","vkmsg","vkmini","vkmem","vkgift","vkun","vkperm"];
@@ -1708,7 +1723,7 @@ function rlist(){
  if(RTAB==="benim")l=l.filter(r=>r.own===USER);
  if(RTAB==="pop")l.sort((a,b)=>roomCnt(b)-roomCnt(a));
  const el=document.getElementById("rlist");if(!el)return;
- el.innerHTML=l.length?l.map(r=>`<div class="vo-row" onclick="voiceRoom('${r.id}')">${rAv(r)}<div class="vo-in"><b>${esc(r.n)}</b><div class="vo-tg"><span class="vo-c c${r.cat}">${r.cat}</span><span class="vo-n">👤 ${roomCnt(r)}</span></div><i>${esc(r.own)}${tk(r.own)}</i></div>${r.perm?`<span class="vo-pin">👑 Premium</span>`:""}${API.tok&&roleOf(USER)==="kur"?`<button class="vo-del" aria-label="Odayı kaldır" onclick="event.stopPropagation();roomKill('${r.id}')"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 12h6l1-12"/></svg></button>`:""}</div>`).join(""):`<div class="rl s" style="text-align:center;margin:30px 0">${RCAT==="Katıl"?"Girdiğin odalar burada görünür.":RCAT==="Takip et"?"Arkadaşlarının odaları burada görünür.":RTAB==="benim"?"Henüz odan yok. Sağ üstteki + ile oda aç.":API.tok?"Şu an açık oda yok. Sağ üstteki + ile ilk odayı sen aç!":"Oda bulunamadı."}</div>`}
+ el.innerHTML=l.length?l.map(r=>`<div class="vo-row" onclick="voiceRoom('${r.id}')">${rAv(r)}<div class="vo-in"><b>${esc(r.n)}</b><div class="vo-tg"><span class="vo-c c${r.cat}">${r.cat}</span><span class="vo-n"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5"/></svg>${roomCnt(r)}</span></div><i>${esc(r.own)}${tk(r.own)}</i></div>${r.perm?`<span class="vo-pin">👑 Premium</span>`:""}${API.tok&&roleOf(USER)==="kur"?`<button class="vo-del" aria-label="Odayı kaldır" onclick="event.stopPropagation();roomKill('${r.id}')"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 12h6l1-12"/></svg></button>`:""}</div>`).join(""):`<div class="rl s" style="text-align:center;margin:30px 0">${RCAT==="Katıl"?"Girdiğin odalar burada görünür.":RCAT==="Takip et"?"Arkadaşlarının odaları burada görünür.":RTAB==="benim"?"Henüz odan yok. Sağ üstteki + ile oda aç.":API.tok?"Şu an açık oda yok. Sağ üstteki + ile ilk odayı sen aç!":"Oda bulunamadı."}</div>`}
 function rTab(t){RTAB=t;tVoice()}
 function rCat(c){RCAT=c;tVoice()}
 function rSearch(v){RQ=v;rlist()}
