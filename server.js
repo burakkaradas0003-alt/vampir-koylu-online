@@ -139,7 +139,7 @@ function roomApi(a, p, q, req, res, b) {
     r.ok[N] = 1; if (r.out) delete r.out[N]; const first = !r.mem[N]; r.mem[N] = now();
     if (r.own === N) r.seats[0] = N;
     r.jn = r.jn || {}; if (first && !(r.jn[N] && now() - r.jn[N] < 600000)) { rchat(r, "join", N); r.jn[N] = now(); }
-    return send(res, 200, { room: pubRoom(r, N), seats: r.seats, mem: Object.keys(r.mem), chat: r.chat.slice(-30), seq: r.cs, rl: rlOf(r) });
+    return send(res, 200, { room: pubRoom(r, N), seats: r.seats, mem: Object.keys(r.mem), chat: first ? [] : r.chat.slice(-30), seq: r.cs, rl: rlOf(r) });
   }
   if (r.ban.includes(N)) return send(res, 200, { kicked: 1 });
   if (!r.ok[N] || (r.out && r.out[N])) return send(res, 403, { err: "Önce odaya gir." });
