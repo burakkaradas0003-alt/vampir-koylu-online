@@ -88,8 +88,9 @@ function limited(ip) {
 const RM = {};
 const RCATS2 = ["Müzik", "Oyun", "Sohbet", "Eğlence"], RBG2 = ["Basit", "Neon", "Kızıl", "Orman", "Okyanus"];
 const STATIC = ["id", "n", "cat", "own", "perm", "adm", "lk", "ban", "ms", "ann", "mode", "bg", "partner", "nochat", "noimg", "noenv", "pw", "img", "desc"];
-function rmNew(o) { return Object.assign({ adm: [], lk: [], ban: [], ms: [], ann: "", mode: "Normal", bg: "Neon", partner: "Normal", nochat: false, noimg: false, noenv: false, pw: "", img: null, desc: "", perm: 0 }, o, { seats: Array(10).fill(null), mem: {}, ok: {}, chat: [], cs: 0, sig: {}, gone: 0 }); }
-function syncRooms() { DB.rooms = Object.values(RM).filter(r => r.perm).map(r => { const o = {}; STATIC.forEach(k => o[k] = r[k]); return o; }); }
+function rmNew(o) { return Object.assign({ log: [], adm: [], lk: [], ban: [], ms: [], ann: "", mode: "Normal", bg: "Neon", partner: "Normal", nochat: false, noimg: false, noenv: false, pw: "", img: null, desc: "", perm: 0 }, o, { seats: Array(10).fill(null), mem: {}, ok: {}, chat: [], cs: 0, sig: {}, gone: 0 }); }
+function syncRooms() { DB.rooms = Object.values(RM).filter(r => r.perm).map(r => { const o = {}; STATIC.forEach(k => o[k] = r[k]); o.log = r.log || []; return o; }); }
+function rlog(r, k, n, by) { r.log = r.log || []; r.log.unshift({ k, n, by, t: now() }); if (r.log.length > 300) r.log.length = 300; }
 (DB.rooms || []).forEach(r => { RM[r.id] = rmNew(r); });
 const rlOf = r => { const o = {}; Object.keys(r.mem).concat(r.own).forEach(n => { const u = DB.users[key(n)]; if (u) o[n] = { r: u.role || "", ti: u.titles || [], vl: u.vl || 0 }; }); return o; };
 const mgrOf = (r, n) => r.own === n || r.adm.includes(n);
@@ -122,6 +123,10 @@ function roomApi(a, p, q, req, res, b) {
   }
   const r = find(b.id || q.get("id"));
   if (!r) return send(res, 404, { err: "Oda kapandı.", gone: 1 });
+  if (p === "room/log") {
+    if (!mgrOf(r, N)) return send(res, 403, { err: "Yetkin yok." });
+    return send(res, 200, { list: (r.log || []).slice(0, 300).map(x => { const u = DB.users[key(x.n)], v = DB.users[key(x.by)]; return { k: x.k, n: x.n, id: (u || {}).id || 0, by: x.by, bid: (v || {}).id || 0, t: x.t }; }) });
+  }
   if (p === "room/delete") {
     if (me.role !== "kur") return send(res, 403, { err: "Yetkin yok." });
     for (const k2 in RM) if (RM[k2] === r) delete RM[k2];
@@ -198,16 +203,17 @@ function roomApi(a, p, q, req, res, b) {
     ["nochat", "noimg", "noenv"].forEach(k => { if (typeof o[k] === "boolean") r[k] = o[k]; });
     if (o.img === null) r.img = null; else if (typeof o.img === "string" && o.img.startsWith("data:image/") && o.img.length < 400000) r.img = o.img;
     const ints = a => Array.isArray(a) ? a.map(Number).filter(v => v >= 0 && v < 10) : null;
-    if (ints(o.lk)) r.lk = ints(o.lk); if (ints(o.ms)) r.ms = ints(o.ms);
+    if (ints(o.lk)) r.lk = ints(o.lk);
+    if (ints(o.ms)) { const old = r.ms || [], nw = ints(o.ms); nw.filter(i => !old.includes(i)).forEach(i => { if (r.seats[i]) rlog(r, "mute", r.seats[i], N); }); old.filter(i => !nw.includes(i)).forEach(i => { if (r.seats[i]) rlog(r, "unmute", r.seats[i], N); }); r.ms = nw; }
     if (own && Array.isArray(o.adm)) r.adm = o.adm.map(String).filter(x => DB.users[key(x)]).slice(0, 20);
     if (own && o.perm) { if (!r.perm && Object.values(RM).some(x => x !== r && x.own === N && x.perm)) return send(res, 409, { err: "Sadece 1 premium odan olabilir." }); r.perm = 1; }
     r.lk.forEach(i => { if (i > 0 && r.seats[i]) r.seats[i] = null; }); if (r.partner === "Kapat") r.seats[1] = null;
     save(); return send(res, 200, {});
   }
-  if (p === "room/down") { if (!mgrOf(r, N)) return send(res, 403, {}); const k = r.seats.indexOf(b.n); if (k > 0 && b.n !== r.own && !(r.adm.includes(b.n) && r.own !== N)) r.seats[k] = null; return send(res, 200, {}); }
+  if (p === "room/down") { if (!mgrOf(r, N)) return send(res, 403, {}); const k = r.seats.indexOf(b.n); if (k > 0 && b.n !== r.own && !(r.adm.includes(b.n) && r.own !== N)) { r.seats[k] = null; rlog(r, "down", b.n, N); } return send(res, 200, {}); }
   if (p === "room/kick") {
     const n = String(b.n || ""); if (!mgrOf(r, N) || n === r.own || n === N || (r.adm.includes(n) && r.own !== N)) return send(res, 403, {});
-    if (!r.ban.includes(n)) r.ban.push(n); r.adm = r.adm.filter(x => x !== n); delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null;
+    if (!r.ban.includes(n)) { r.ban.push(n); } rlog(r, "kick", n, N); r.adm = r.adm.filter(x => x !== n); delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null;
     save(); return send(res, 200, {});
   }
   if (p === "room/sig") {
