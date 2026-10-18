@@ -1165,7 +1165,7 @@ function auth(){
  const head=`<div class="lg-t"><img class="lg-l" alt="Spenctied" src="${LOGO2}"><h1>SpenctieD</h1><p>Sosyal oyunlar &amp; Sesli sohbetler</p></div>`;
  const body=land?`<div class="lg-b"><button class="lg-bt p" onclick="AT='in';auth()">Kullanıcı girişi</button><button class="lg-bt" onclick="AT='up';auth()">Kayıt ol</button></div>`
  :`<div class="lg-b"><div class="lg-f"><input id="au" maxlength="12" placeholder="Kullanıcı adı" autocomplete="username"><input id="ap" type="password" maxlength="30" placeholder="Şifre" autocomplete="${reg?"new-password":"current-password"}">${reg?`<input id="ap2" type="password" maxlength="30" placeholder="Şifre (tekrar)" autocomplete="new-password">`:""}<div id="ae" class="ae"></div></div><button class="lg-bt p" onclick="authGo()">${reg?"Kayıt ol":"Giriş yap"}</button><button class="lg-bt" onclick="AT='';auth()">Geri</button></div>`;
- $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 486</div></div>`}
+ $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 487</div></div>`}
 var PREVIEW=0;
 const API={tok:(()=>{try{return localStorage.getItem("vktok")||""}catch(e){return""}})()};
 const SYNCK=["vkstat","vkfrm","vkinfo","vkpic","vkjack","vkvipd","vklast","vkfol","vkfr","vkfrq","vkmsg","vkmini","vkmem","vkgift","vkun","vkperm"];
@@ -2903,7 +2903,7 @@ roomSave=function(){const r=CURR;if(!roomOn()||!isMgr(r))return;const o={};["n",
 {const ghost=(el,cls)=>{try{const g=document.createElement("div");g.className="rm-ghost "+cls;g.appendChild(el);document.body.appendChild(g);g.cl=()=>{try{g.remove()}catch(e){}};if(cls==="out"){g.addEventListener("animationend",g.cl,{once:true});setTimeout(g.cl,1200)}return g}catch(e){}};
  const cur=()=>{const e=document.querySelector("#app > .rm");return e?e.cloneNode(true):null};
  const slideIn=fn=>function(){const same=!!window.NOSLIDE||(CURR&&arguments[0]&&arguments[0].room&&CURR.id===arguments[0].room.id&&!MINI);const old=same?null:cur();const r=fn.apply(this,arguments);try{const n=document.querySelector("#app > .rm.vr-bgn");if(n&&!same){n.classList.add("rm-in");const g=old?ghost(old,"under"):null;let dn=0;const fin=()=>{if(dn)return;dn=1;clearInterval(iv);n.classList.remove("rm-in");if(g)g.cl()};n.addEventListener("animationstart",()=>{window.RENT=Date.now()},{once:true});n.addEventListener("animationend",fin,{once:true});const iv=setInterval(()=>{if(!n.isConnected)fin()},60);setTimeout(fin,2500)}}catch(e){}return r};
- const slideOut=fn=>function(){const e=document.querySelector("#app > .rm.vr-bgn");const old=e&&CURR&&!MINI?e.cloneNode(true):null;const r=fn.apply(this,arguments);if(old)ghost(old,"out");return r};
+ const slideOut=fn=>function(){const e=document.querySelector("#app > .rm.vr-bgn");const old=e&&CURR&&!MINI&&!window.NOGHOST?e.cloneNode(true):null;const r=fn.apply(this,arguments);if(old)ghost(old,"out");return r};
  roomEnter=slideIn(roomEnter);roomBack=slideIn(roomBack);roomLeave=slideOut(roomLeave);roomMin=slideOut(roomMin)}
 {let sx=0,sy=0,ok=false;
  const busy=()=>!!document.querySelector(".edb,.dlg,#uc,#gf,.rs-pg,#kbm");
@@ -3041,7 +3041,7 @@ setInterval(()=>{if(!window.LOCOK||!API.tok||!USER||(typeof CURR!=="undefined"&&
 function locRestore(){try{const o=JSON.parse(localStorage.getItem(LOCK)||"null");if(!o||!o.t||o.t==="game")return;menu(o.t);if(o.t==="msg"&&o.c&&MG()[o.c])chat(o.c)}catch(e){}}
 async function roomRestore(){let o=null;try{o=JSON.parse(localStorage.getItem(RJ)||"null")}catch(e){}
  if(!o||!o.id||Date.now()-o.t>5*60000){rjDel();return}
- try{TAB="voice";tVoice();await roomsLoad();if(!(RSV||[]).some(r=>r.id===o.id)){rjDel();TAB="game";menu();return}window.NOSLIDE=1;window.JN={[o.id]:1};setTimeout(()=>{window.NOSLIDE=0},4000);const j=await api("room/join",{id:o.id});if(!j.ok){rjDel();return}window.RPG="voice";roomEnter(j);roomMin();return 1}catch(e){rjDel()}}
+ try{TAB="voice";tVoice();await roomsLoad();if(!(RSV||[]).some(r=>r.id===o.id)){rjDel();TAB="game";menu();return}window.NOSLIDE=1;window.JN={[o.id]:1};setTimeout(()=>{window.NOSLIDE=0},4000);const j=await api("room/join",{id:o.id});if(!j.ok){rjDel();return}window.RPG="voice";window.NOGHOST=1;try{roomEnter(j);roomMin()}finally{window.NOGHOST=0}return 1}catch(e){rjDel()}}
 (async()=>{if(!API.tok){home();return}const j=await api("me");if(j.ok){enter({token:API.tok,user:j.user,blob:j.blob,id:j.id,role:j.role,ti:j.ti});let rr=0;try{rr=await roomRestore()}catch(e){}if(!rr)locRestore();window.LOCOK=1}else{if(j.status===401){API.tok="";try{localStorage.removeItem("vktok")}catch(e){}}home()}})();
 
 /* Kaydırma hareketleri: overlay'de geri, sekmelerde geçiş */
