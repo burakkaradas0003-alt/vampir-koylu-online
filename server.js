@@ -47,7 +47,8 @@ Object.values(DB.users).forEach(u => {
 const banOf = u => { const b = u.ban; if (!b) return null; if (b.u && b.u < now()) { delete u.ban; return null; } return b; };
 const banMsg = b => "Hesabın banlandı" + (b.r ? ": " + b.r : "") + (b.u ? " (" + new Date(b.u).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) + " tarihine kadar)" : " (süresiz)");
 const glOn = () => DB.gl !== 0;
-const meOf = u => ({ id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0, gl: glOn() ? 1 : 0 });
+const grOf = u => { const t = now(); return (u.gr || []).filter(x => !x.e || x.e > t); };
+const meOf = u => ({ gr: grOf(u), id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0, gl: glOn() ? 1 : 0 });
 
 const send = (res, code, obj) => { res.writeHead(code, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }); res.end(JSON.stringify(obj)); };
 function body(req) {
@@ -87,7 +88,7 @@ function limited(ip) {
 // ---- Sesli odalar ----
 const RM = {};
 const RCATS2 = ["Müzik", "Oyun", "Sohbet", "Eğlence"], RBG2 = ["Basit", "Neon", "Kızıl", "Orman", "Okyanus"];
-const STATIC = ["id", "n", "cat", "own", "perm", "adm", "lk", "ban", "ms", "ann", "mode", "bg", "partner", "nochat", "noimg", "noenv", "pw", "img", "desc"];
+const STATIC = ["id", "n", "cat", "own", "perm", "adm", "lk", "ban", "ms", "ann", "mode", "bg", "partner", "nochat", "noimg", "noenv", "pw", "img", "desc", "xp"];
 function rmNew(o) { return Object.assign({ log: [], adm: [], lk: [], ban: [], ms: [], ann: "", mode: "Normal", bg: "Neon", partner: "Normal", nochat: false, noimg: false, noenv: false, pw: "", img: null, desc: "", perm: 0 }, o, { seats: Array(10).fill(null), mem: {}, ok: {}, chat: [], cs: 0, sig: {}, gone: 0 }); }
 function syncRooms() { DB.rooms = Object.values(RM).filter(r => r.perm).map(r => { const o = {}; STATIC.forEach(k => o[k] = r[k]); o.log = r.log || []; return o; }); }
 function rlog(r, k, n, by) { r.log = r.log || []; r.log.unshift({ k, n, by, t: now() }); if (r.log.length > 300) r.log.length = 300; }
@@ -102,15 +103,15 @@ setInterval(() => {
   const t = now();
   for (const id in RM) {
     const r = RM[id];
-    for (const n in r.mem) if (t - r.mem[n] > 20000) { delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null; }
+    for (const n in r.mem) if (t - r.mem[n] > 10000) { delete r.mem[n]; const k = r.seats.indexOf(n); if (k >= 0) r.seats[k] = null; }
     if (!r.mem[r.own]) { r.seats[0] = null; if (!r.perm) { r.gone = r.gone || t; if (t - r.gone > 8000) delete RM[id]; } } else r.gone = 0;
   }
-}, 3000);
+}, 1000);
 function roomApi(a, p, q, req, res, b) {
   const me = a.u, N = me.n;
   const find = id => RM[String(id || "")];
   if (p === "rooms") {
-    return send(res, 200, { list: Object.values(RM).map(r => ({ id: r.id, n: r.n, cat: r.cat, own: r.own, perm: r.perm, img: imgUrl(r), pw: !!r.pw, cnt: Object.keys(r.mem).length })) });
+    return send(res, 200, { list: Object.values(RM).map(r => ({ id: r.id, n: r.n, cat: r.cat, own: r.own, perm: r.perm, img: imgUrl(r), pw: !!r.pw, xp: r.xp || 0, cnt: Object.keys(r.mem).length })) });
   }
   if (p === "room/create") {
     const n = String(b.n || "").trim().slice(0, 24), cat = RCATS2.includes(b.cat) ? b.cat : "Sohbet";
@@ -347,7 +348,7 @@ async function api(req, res, p, q) {
       else if (now() - v[i].t > 60000) { const e = v.splice(i, 1)[0]; e.t = now(); v.unshift(e); }
       if (v.length > 200) v.length = 200;
     }
-    const out = { n: u.n, created: u.created, on: now() - (u.last || 0) < ONLINE_MS, st: u.st || "", id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0 };
+    const out = { n: u.n, created: u.created, on: now() - (u.last || 0) < ONLINE_MS, st: u.st || "", id: u.id, role: u.role || "", ti: u.titles || [], vl: u.vl || 0, gr: grOf(u) };
     PUB_KEYS.forEach(k => { if ((u.blob || {})[k]) out[k] = u.blob[k]; });
     return send(res, 200, out);
   }
@@ -448,10 +449,25 @@ async function api(req, res, p, q) {
     if (u.inb.length > 300) u.inb.splice(0, u.inb.length - 300);
     save(); return send(res, 200, { i: DB.seq, t });
   }
+  if (p === "read" && req.method === "POST") {
+    const b = await body(req); const u = b && other(b.from); if (!u || u === me) return send(res, 200, {});
+    u.rdb = u.rdb || {}; const sq = DB.seq || 0; if ((u.rdb[me.n] || 0) < sq) { u.rdb[me.n] = sq; save(); } return send(res, 200, {});
+  }
+  if (p === "gift/send" && req.method === "POST") {
+    const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
+    const u = other(b.to); if (!u || u === me) return send(res, 404, { err: "Kullanıcı bulunamadı." });
+    const g = String(b.g || "").replace(/[^a-z0-9_]/gi, "").slice(0, 12), q = Math.max(1, Math.min(99, parseInt(b.q) || 1)), pr = Math.max(1, Math.min(5000, parseInt(b.p) || 1));
+    if (!g) return send(res, 400, { err: "Hediye yok." });
+    const t = now(), rec = { g, f: me.n, q, p: pr, t }; if (b.ttl) rec.e = t + Math.min(864e5, Math.max(0, +b.ttl || 0));
+    u.gr = u.gr || []; u.gr.push(rec); if (u.gr.length > 300) u.gr.splice(0, u.gr.length - 300); u.gt = t;
+    const rid = String(b.rid || ""), r = RM[rid];
+    if (r && r.mem[me.n]) { const m = rchat(r, "gift", me.n, String(b.nm || "").slice(0, 24) + (q > 1 ? " x" + q : "")); m.to = u.n; m.g = g; m.q = q; r.xp = (r.xp || 0) + pr * q; }
+    save(); return send(res, 200, { ok: 1 });
+  }
   if (p === "poll") {
     me.last = now();
     const since = +(q.get("since") || 0);
-    return send(res, 200, { msgs: me.inb.filter(m => m.i > since).slice(0, 100), seq: DB.seq || 0, ...fstate() });
+    return send(res, 200, { msgs: me.inb.filter(m => m.i > since).slice(0, 100), seq: DB.seq || 0, rdb: me.rdb || {}, gt: me.gt || 0, ...fstate() });
   }
   if (p === "friend" && req.method === "POST") {
     const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
