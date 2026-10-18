@@ -1170,7 +1170,7 @@ function auth(){
  const head=`<div class="lg-t"><img class="lg-l" alt="Spenctied" src="${LOGO2}"><h1>SpenctieD</h1><p>Sosyal oyunlar &amp; Sesli sohbetler</p></div>`;
  const body=land?`<div class="lg-b"><button class="lg-bt p" onclick="AT='in';auth()">Kullanıcı girişi</button><button class="lg-bt" onclick="AT='up';auth()">Kayıt ol</button></div>`
  :`<div class="lg-b"><div class="lg-f"><input id="au" maxlength="12" placeholder="Kullanıcı adı" autocomplete="username"><input id="ap" type="password" maxlength="30" placeholder="Şifre" autocomplete="${reg?"new-password":"current-password"}">${reg?`<input id="ap2" type="password" maxlength="30" placeholder="Şifre (tekrar)" autocomplete="new-password">`:""}<div id="ae" class="ae"></div></div><button class="lg-bt p" onclick="authGo()">${reg?"Kayıt ol":"Giriş yap"}</button><button class="lg-bt" onclick="AT='';auth()">Geri</button></div>`;
- $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 498</div></div>`}
+ $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 500</div></div>`}
 var PREVIEW=0;
 const API={tok:(()=>{try{return localStorage.getItem("vktok")||""}catch(e){return""}})()};
 const SYNCK=["vkstat","vkfrm","vkinfo","vkpic","vkjack","vkvipd","vklast","vkfol","vkfr","vkfrq","vkmsg","vkmini","vkmem","vkgift","vkun","vkperm"];
@@ -2202,6 +2202,7 @@ function ddOpen(){
  <div class="dd-ft"><div class="dd-fa">${av({n:USER},"dd-fv nofr")}</div><div class="dd-fn"><b>${esc(USER)}</b><span id="ddlw"></span></div></div>`;
  document.body.appendChild(o);ddSync().then(()=>{DD.rd=0;ddTick()});ddTick();requestAnimationFrame(ddLoop)}
 function roomMic(){
+ if(MIC&&MIC.getAudioTracks().every(t=>t.readyState==='ended'))MIC=null;
  if(CURR&&(CURR.ms||[]).includes(RSEAT.indexOf(USER))){toast("Bu koltuk sessize alındı.");return}
  if(RSEAT.indexOf(USER)<0){toast("Önce bir koltuğa otur.");return}
  if(!MIC){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast("Mikrofon bu sayfada kullanılamıyor.");return}
@@ -2951,7 +2952,7 @@ function lkLoad(){if(window.LivekitClient)return Promise.resolve(true);
  const src=["https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.js","https://unpkg.com/livekit-client@2/dist/livekit-client.umd.js"];
  const one=u=>new Promise(res=>{const s=document.createElement("script");s.src=u;s.onload=()=>res(!!window.LivekitClient);s.onerror=()=>{s.remove();res(false)};document.head.appendChild(s)});
  return one(src[0]).then(ok=>ok||one(src[1]))}
-function lkLeave(){try{if(LK.r)LK.r.disconnect()}catch(e){}Object.values(LK.au).forEach(a=>{try{a.pause();a.srcObject=null;a.remove()}catch(e){}});document.querySelectorAll("audio").forEach(a=>{try{if(!a.isConnected||a.style.display==="none"){a.pause();a.srcObject=null;a.remove()}}catch(e){}});LK.au={};LK.r=null;LK.ok=0;LK.id=null;LK.pub=null;LK.pubT=null;LK.fail=0}
+function lkLeave(){try{if(LK.r)LK.r.disconnect(false)}catch(e){}Object.values(LK.au).forEach(a=>{try{a.pause();a.srcObject=null;a.remove()}catch(e){}});document.querySelectorAll("audio").forEach(a=>{try{if(!a.isConnected||a.style.display==="none"){a.pause();a.srcObject=null;a.remove()}}catch(e){}});LK.au={};LK.r=null;LK.ok=0;LK.id=null;LK.pub=null;LK.pubT=null;LK.fail=0}
 async function lkJoin(){
  if(LK.busy||LK.off||!API.tok||!CURR)return;LK.busy=1;const id=CURR.id;
  try{const j=await api("lk/token",{room:id});
@@ -2961,12 +2962,15 @@ async function lkJoin(){
   if(!CURR||CURR.id!==id)return;
   const L=window.LivekitClient,room=new L.Room({dynacast:true,adaptiveStream:false});
   room.on(L.RoomEvent.TrackSubscribed,(tr,pub,p)=>{if(tr.kind!=="audio")return;try{const old=LK.au[p.identity];if(old){try{old.pause()}catch(e){}old.srcObject=null;old.remove()}}catch(e){}try{tr.detach().forEach(e=>{try{e.pause()}catch(x){}e.srcObject=null;e.remove()})}catch(e){}const el=tr.attach();el.style.display="none";el.muted=!!MU;el.setAttribute("playsinline","");document.body.appendChild(el);LK.au[p.identity]=el;el.play&&el.play().catch(()=>{})});
+  room.on(L.RoomEvent.AudioPlaybackStatusChanged,()=>{try{if(!room.canPlaybackAudio){LK.need=1;toast("Sesi açmak için ekrana dokun")}else LK.need=0}catch(e){}});
   room.on(L.RoomEvent.TrackUnsubscribed,(tr,pub,p)=>{try{tr.detach().forEach(e=>e.remove())}catch(e){}delete LK.au[p.identity]});
   room.on(L.RoomEvent.Disconnected,()=>{if(LK.r===room){LK.ok=0;LK.r=null;LK.id=null;LK.pub=null;LK.pubT=null;LK.fail=Date.now()-25000}});
   await room.connect(j.url,j.token);
-  if(!CURR||CURR.id!==id){room.disconnect();return}
-  LK.r=room;LK.id=id;LK.ok=1;try{room.startAudio()}catch(e){}
+  if(!CURR||CURR.id!==id){room.disconnect(false);return}
+  LK.r=room;LK.id=id;LK.ok=1;try{room.startAudio()}catch(e){}setTimeout(()=>{try{if(!room.canPlaybackAudio){LK.need=1;toast("Sesi açmak için ekrana dokun")}}catch(e){}},1500)
  }catch(e){LK.fail=Date.now()}finally{LK.busy=0}}
+function lkUnlock(){try{const c=aud();if(c&&c.state!=="running")c.resume()}catch(e){}try{if(LK.r){LK.r.startAudio()}}catch(e){}Object.values(LK.au).forEach(x=>{try{x.muted=!!MU;x.play().catch(()=>{})}catch(e){}})}
+["touchstart","touchend","click","pointerdown"].forEach(ev=>document.addEventListener(ev,()=>{if(CURR||LK.r)lkUnlock()},{capture:true,passive:true}));
 setInterval(()=>{try{if(!CURR&&(LK.r||LK.ok||LK.id))lkLeave();else if(CURR&&LK.ok&&LK.r){if(LK.r.state==="disconnected"){lkLeave();LK.fail=0}else Object.values(LK.au).forEach(x=>{if(x.paused&&x.srcObject)x.play().catch(()=>{})})}}catch(e){}},500);
 function lkSync(){
  if(!API.tok||!CURR)return 0;
@@ -2976,8 +2980,8 @@ function lkSync(){
  Object.keys(VX.pc).forEach(vxClose);
  const mi=RSEAT.indexOf(USER),t=MIC&&MIC.getAudioTracks()[0];
  if(t){t.enabled=!!MS&&mi>=0&&!(CURR.ms||[]).includes(mi);
-  if(LK.pubT!==t){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub)}catch(e){}LK.pubT=t;LK.pub=null;room.localParticipant.publishTrack(t,{name:"mic",source:L.Track.Source.Microphone,dtx:false,red:true,audioPreset:{maxBitrate:64000}}).then(p=>{LK.pub=p&&p.track?p.track:t}).catch(()=>{LK.pubT=null})}}
- else if(LK.pubT){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub)}catch(e){}LK.pub=null;LK.pubT=null}
+  if(LK.pubT!==t){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub,false)}catch(e){}LK.pubT=t;LK.pub=null;room.localParticipant.publishTrack(t,{name:"mic",source:L.Track.Source.Microphone,dtx:false,red:true,audioPreset:{maxBitrate:64000}}).then(p=>{LK.pub=p&&p.track?p.track:t}).catch(()=>{LK.pubT=null})}}
+ else if(LK.pubT){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub,false)}catch(e){}LK.pub=null;LK.pubT=null}
  try{[room.localParticipant,...room.remoteParticipants.values()].forEach(p=>{if(p.isSpeaking)(VX.hd=VX.hd||{})[p.identity]=Date.now()})}catch(e){}
  Object.values(LK.au).forEach(a=>{if(a.muted!==!!MU)a.muted=!!MU});
  return 1}
