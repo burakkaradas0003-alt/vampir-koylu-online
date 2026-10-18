@@ -1169,7 +1169,7 @@ function auth(){
  const head=`<div class="lg-t"><img class="lg-l" alt="Spenctied" src="${LOGO2}"><h1>SpenctieD</h1><p>Sosyal oyunlar &amp; Sesli sohbetler</p></div>`;
  const body=land?`<div class="lg-b"><button class="lg-bt p" onclick="AT='in';auth()">Kullanıcı girişi</button><button class="lg-bt" onclick="AT='up';auth()">Kayıt ol</button></div>`
  :`<div class="lg-b"><div class="lg-f"><input id="au" maxlength="12" placeholder="Kullanıcı adı" autocomplete="username"><input id="ap" type="password" maxlength="30" placeholder="Şifre" autocomplete="${reg?"new-password":"current-password"}">${reg?`<input id="ap2" type="password" maxlength="30" placeholder="Şifre (tekrar)" autocomplete="new-password">`:""}<div id="ae" class="ae"></div></div><button class="lg-bt p" onclick="authGo()">${reg?"Kayıt ol":"Giriş yap"}</button><button class="lg-bt" onclick="AT='';auth()">Geri</button></div>`;
- $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 493</div></div>`}
+ $("#app").innerHTML=`<div class="lg">${head}${body}<div class="lg-n">Hesabın sunucuda saklanır. · Sürüm 494</div></div>`}
 var PREVIEW=0;
 const API={tok:(()=>{try{return localStorage.getItem("vktok")||""}catch(e){return""}})()};
 const SYNCK=["vkstat","vkfrm","vkinfo","vkpic","vkjack","vkvipd","vklast","vkfol","vkfr","vkfrq","vkmsg","vkmini","vkmem","vkgift","vkun","vkperm"];
@@ -2972,7 +2972,7 @@ function lkSync(){
  Object.keys(VX.pc).forEach(vxClose);
  const mi=RSEAT.indexOf(USER),t=MIC&&MIC.getAudioTracks()[0];
  if(t){t.enabled=!!MS&&mi>=0&&!(CURR.ms||[]).includes(mi);
-  if(LK.pubT!==t){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub)}catch(e){}LK.pubT=t;LK.pub=null;room.localParticipant.publishTrack(t,{name:"mic",source:L.Track.Source.Microphone,dtx:false,red:true,audioPreset:{maxBitrate:40000}}).then(p=>{LK.pub=p&&p.track?p.track:t}).catch(()=>{LK.pubT=null})}}
+  if(LK.pubT!==t){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub)}catch(e){}LK.pubT=t;LK.pub=null;room.localParticipant.publishTrack(t,{name:"mic",source:L.Track.Source.Microphone,dtx:false,red:true,audioPreset:{maxBitrate:64000}}).then(p=>{LK.pub=p&&p.track?p.track:t}).catch(()=>{LK.pubT=null})}}
  else if(LK.pubT){try{if(LK.pub)room.localParticipant.unpublishTrack(LK.pub)}catch(e){}LK.pub=null;LK.pubT=null}
  try{[room.localParticipant,...room.remoteParticipants.values()].forEach(p=>{if(p.isSpeaking)(VX.hd=VX.hd||{})[p.identity]=Date.now()})}catch(e){}
  Object.values(LK.au).forEach(a=>{if(a.muted!==!!MU)a.muted=!!MU});
