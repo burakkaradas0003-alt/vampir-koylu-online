@@ -32,7 +32,7 @@ const hash = (p, salt) => crypto.scryptSync(p, salt, 32).toString("hex");
 const key = n => String(n).trim().toLowerCase();
 const NAME_RE = /^[A-Za-z0-9ğüşıöçĞÜŞİÖÇ_.\-]{3,12}$/;
 // Yasaklı (yönetim gibi görünen) adlar; kurucular FOUNDERS değişkeninden gelir (virgülle ayrılmış kullanıcı adları)
-const RESERVED = ["admin", "administrator", "yonetici", "yönetici", "moderator", "moderatör", "mod", "destek", "support", "spenctied", "kurucu", "sistem", "system", "root", "owner", "vampirkoylu"];
+const RESERVED = ["yetkili", "admin", "administrator", "yonetici", "yönetici", "moderator", "moderatör", "mod", "destek", "support", "spenctied", "kurucu", "sistem", "system", "root", "owner", "vampirkoylu"];
 const FOUNDERS = (process.env.FOUNDERS || "").split(",").map(x => key(x)).filter(Boolean);
 const rank = r => (r === "kur" ? 3 : r === "sup" ? 2 : r === "mod" ? 1 : 0);
 const usedIds = new Set();
@@ -44,6 +44,8 @@ Object.values(DB.users).forEach(u => {
   u.id = id; usedIds.add(id);
   if (FOUNDERS.includes(key(u.n))) u.role = "kur";
 });
+const SYS = "Yetkili";
+if (!DB.users[key(SYS)]) { const salt = crypto.randomBytes(12).toString("hex"); DB.users[key(SYS)] = { n: SYS, salt, h: hash(crypto.randomBytes(24).toString("hex"), salt), created: now(), blob: {}, last: now(), st: "Çevrimiçi", id: newId(), role: "", titles: ["Resmi Hesap"], inb: [], fl: [], fin: [], fout: [] }; }
 const banOf = u => { const b = u.ban; if (!b) return null; if (b.u && b.u < now()) { delete u.ban; return null; } return b; };
 const banMsg = b => "Hesabın banlandı" + (b.r ? ": " + b.r : "") + (b.u ? " (" + new Date(b.u).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) + " tarihine kadar)" : " (süresiz)");
 const glOn = () => DB.gl !== 0;
@@ -377,6 +379,13 @@ async function api(req, res, p, q) {
     }
     if (req.method !== "POST") return send(res, 405, { err: "Geçersiz." });
     const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
+    if (p === "admin/broadcast") {
+      const x = String(b.x || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 300); if (!x) return send(res, 400, { err: "Mesaj boş." });
+      const tt = now(); if (DB.bcT && tt - DB.bcT < 10000) return send(res, 429, { err: "Biraz bekle, az önce mesaj gönderildi." }); DB.bcT = tt;
+      let c = 0; Object.values(DB.users).forEach(u => { if (u.n === SYS) return; DB.seq = (DB.seq || 0) + 1; u.inb = u.inb || []; u.inb.push({ i: DB.seq, f: SYS, x, t: tt }); if (u.inb.length > 300) u.inb.splice(0, u.inb.length - 300); c++; });
+      DB.blog = DB.blog || []; DB.blog.push({ by: me.n, x, t: tt, c }); if (DB.blog.length > 100) DB.blog.splice(0, DB.blog.length - 100);
+      save(); return send(res, 200, { c });
+    }
     if (p === "admin/gl") { if (myR < 3) return send(res, 403, { err: "Yalnızca kurucu değiştirebilir." }); DB.gl = b.on ? 1 : 0; save(); return send(res, 200, { gl: DB.gl }); }
     const t = b.id ? Object.values(DB.users).find(x => String(x.id) === String(b.id)) : DB.users[key(b.n || "")]; if (!t) return send(res, 404, { err: "Kullanıcı bulunamadı." });
     if (p === "admin/jt") {
@@ -445,6 +454,7 @@ async function api(req, res, p, q) {
     const u = other(b.to), x = String(b.x || "").trim().slice(0, 300);
     if (!u || u === me) return send(res, 404, { err: "Kullanıcı bulunamadı." });
     if (!x) return send(res, 400, { err: "Boş mesaj." });
+    if (u.n === SYS) return send(res, 403, { err: "Bu hesaba mesaj yazılamaz." });
     const t = now(); me._s = (me._s || []).filter(z => t - z < 60000);
     if (me._s.length >= 40) return send(res, 429, { err: "Çok hızlı yazıyorsun." });
     me._s.push(t);
@@ -459,10 +469,12 @@ async function api(req, res, p, q) {
   }
   if (p === "gift/send" && req.method === "POST") {
     const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
-    const u = other(b.to); if (!u || u === me) return send(res, 404, { err: "Kullanıcı bulunamadı." });
-    const g = String(b.g || "").replace(/[^a-z0-9_]/gi, "").slice(0, 12), q = Math.max(1, Math.min(99, parseInt(b.q) || 1)), pr = Math.max(1, Math.min(5000, parseInt(b.p) || 1));
-    if (!g) return send(res, 400, { err: "Hediye yok." });
-    const t = now(), rec = { g, f: me.n, q, p: pr, t }; if (b.ttl) rec.e = t + Math.min(864e5, Math.max(0, +b.ttl || 0));
+    const u = other(b.to); if (!u || u === me || u.n === SYS) return send(res, 404, { err: "Kullanıcı bulunamadı." });
+    const GP = { gul: 5, sar: 10, kad: 15, kan: 25, kaz: 30, kre: 50, tac: 80, kral: 1000, elm: 150 };
+    const g = String(b.g || "").replace(/[^a-z0-9_]/gi, "").slice(0, 12), q = Math.max(1, Math.min(99, parseInt(b.q) || 1)), pr = GP[g];
+    if (!g || !pr) return send(res, 400, { err: "Hediye yok." });
+    const t = now(); me._gs = (me._gs || []).filter(z => t - z < 60000); if (me._gs.length >= 20) return send(res, 429, { err: "Çok hızlı hediye gönderiyorsun." }); me._gs.push(t);
+    const rec = { g, f: me.n, q, p: pr, t }; if (g === "kral") rec.e = t + 864e5;
     u.gr = u.gr || []; u.gr.push(rec); if (u.gr.length > 300) u.gr.splice(0, u.gr.length - 300); u.gt = t;
     const rid = String(b.rid || ""), r = RM[rid];
     if (r && r.mem[me.n]) { const m = rchat(r, "gift", me.n, String(b.nm || "").slice(0, 24) + (q > 1 ? " x" + q : "")); m.to = u.n; m.g = g; m.q = q; r.xp = (r.xp || 0) + pr * q; }
@@ -477,6 +489,7 @@ async function api(req, res, p, q) {
     const b = await body(req); if (!b) return send(res, 400, { err: "Geçersiz." });
     const u = other(b.to), act = b.act;
     if (!u || u === me) return send(res, 404, { err: "Kullanıcı bulunamadı." });
+    if (u.n === SYS) return send(res, 403, { err: "Bu hesapla arkadaş olunamaz." });
     if (act === "req") {
       if (me.fl.includes(u.n)) return send(res, 200, fstate());
       if (me.fin.includes(u.n)) { rm(me.fin, u.n); rm(u.fout, me.n); add(me.fl, u.n); add(u.fl, me.n); }
