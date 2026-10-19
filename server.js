@@ -99,6 +99,7 @@ const rlOf = r => { const o = {}; Object.keys(r.mem).concat(r.own).forEach(n => 
 const mgrOf = (r, n) => r.own === n || r.adm.includes(n);
 const imgUrl = r => { if (!r.img) return null; if (!r._ih || r._ik !== r.img) { r._ik = r.img; r._ih = crypto.createHash("md5").update(r.img).digest("hex").slice(0, 10); } return "/rimg/" + r.id + "?v=" + r._ih; };
 function banned(r, n) { if (!r.ban.includes(n)) return false; const t = r.kt && r.kt[n]; if (t && t < now()) { r.ban = r.ban.filter(x => x !== n); delete r.kt[n]; return false; } return true; }
+const CIMG = new Map();
 function pubRoom(r, n) { r.ban.slice().forEach(x => banned(r, x)); const o = {}; STATIC.forEach(k => o[k] = r[k]); o.img = imgUrl(r); if (!mgrOf(r, n)) o.pw = !!r.pw; if (r.own !== n) o.ban = mgrOf(r, n) ? r.ban : []; return o; }
 function rchat(r, k, n, x, f) { const m = { i: ++r.cs, k, n, x, f: f || n, t: now() }; r.chat.push(m); if (r.chat.length > 80) r.chat.splice(0, r.chat.length - 80); return m; }
 function rmStale() { return Object.values(RM); }
@@ -175,6 +176,16 @@ function roomApi(a, p, q, req, res, b) {
     return;
   }
   if (p === "room/leave") { if (b.ph) { if (r.mem[N]) r.mem[N] = now() + 15000; return send(res, 200, {}); } /* sayfa yenileme: koltuk ve üyelik korunur, 20 sn içinde dönmezse otomatik düşer */ delete r.mem[N]; r.out = r.out || {}; r.out[N] = 1; if (r.own === N && r.perm) rchat(r, "sys", "", "Oda sahibi odadan ayrıldı.", N); if (!b.ph && r.jn) delete r.jn[N]; const k = r.seats.indexOf(N); if (k >= 0) r.seats[k] = null; if (r.own === N) { r.seats[0] = null; if (!r.perm && !b.ph) { for (const k2 in RM) if (RM[k2] === r) delete RM[k2]; } } return send(res, 200, {}); }
+  if (p === "room/img") {
+    if (r.noimg && !mgrOf(r, N)) return send(res, 403, { err: "Bu odada resim gönderme kapalı." });
+    if (r.nochat && !mgrOf(r, N)) return send(res, 403, { err: "Sohbet kapalı." });
+    const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+\/=]+)$/.exec(String(b.d || "")); if (!m) return send(res, 400, { err: "Fotoğraf geçersiz." });
+    const buf = Buffer.from(m[2], "base64"); if (buf.length < 100 || buf.length > 600000) return send(res, 400, { err: "Fotoğraf çok büyük." });
+    const tt = now(); if (me._im && tt - me._im < 4000) return send(res, 429, { err: "Biraz bekle, az önce fotoğraf gönderdin." }); me._im = tt;
+    const iid = crypto.randomBytes(8).toString("hex"); CIMG.set(iid, { m: m[1], b: buf });
+    while (CIMG.size > 300) CIMG.delete(CIMG.keys().next().value);
+    rchat(r, "img", N, iid); return send(res, 200, { u: iid });
+  }
   if (p === "room/chat") {
     const x = String(b.x || "").trim().slice(0, 200); if (!x) return send(res, 400, {});
     if (b.k === "sys") { if (!mgrOf(r, N)) return send(res, 403, {}); rchat(r, "sys", "", x, N); return send(res, 200, {}); }
@@ -508,6 +519,12 @@ async function api(req, res, p, q) {
 http.createServer((req, res) => {
   const url = new URL(req.url, "http://x");
   if (url.pathname.startsWith("/api/")) return api(req, res, url.pathname.slice(5), url.searchParams).catch(e => { console.log(e); send(res, 500, { err: "Sunucu hatası." }); });
+  if (url.pathname.startsWith("/cimg/")) {
+    const o = CIMG.get(url.pathname.slice(6));
+    if (!o) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { "Content-Type": o.m, "Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff" });
+    return res.end(o.b);
+  }
   if (url.pathname.startsWith("/rimg/")) {
     const r = RM[decodeURIComponent(url.pathname.slice(6))];
     const m = r && r.img && /^data:(image\/[a-z0-9.+-]+);base64,(.*)$/s.exec(r.img);
